@@ -54,9 +54,61 @@ const bidButtons = Array.from(document.querySelectorAll(".bid-button"));
 const suitButtons = Array.from(document.querySelectorAll(".suit-button"));
 const suitOrder = { Heart: 0, Diamond: 1, Spade: 2, Clover: 3, Gray: 4, Color: 5 };
 const rankOrder = { A: 0, K: 1, Q: 2, J: 3, 10: 4, 9: 5, 8: 6, 7: 7, 6: 8, Joker: 9 };
+const suitGlyphs = {
+  Heart: "&hearts;",
+  Diamond: "&diams;",
+  Spade: "&spades;",
+  Clover: "&clubs;",
+  Gray: "&#10022;",
+  Color: "&#10022;",
+};
+const pipLayouts = {
+  A: ["cc"],
+  6: ["tl", "tr", "ml", "mr", "bl", "br"],
+  7: ["tl", "tr", "tc", "ml", "mr", "bl", "br"],
+  8: ["tl", "tr", "tc", "ml", "mr", "bl", "br", "bc"],
+  9: ["tl", "tr", "tc", "ml", "mr", "cc", "bl", "br", "bc"],
+  10: ["tl", "tr", "tc", "ml", "mr", "ict", "icb", "bl", "br", "bc"],
+};
 
 function setBanner(text) {
   els.banner.textContent = text;
+}
+
+function suitGlyph(suit) {
+  return suitGlyphs[suit] || "?";
+}
+
+function pipMarkup(rank, suit) {
+  const positions = pipLayouts[rank] || ["cc"];
+  return `
+    <div class="pip-layout pip-count-${positions.length}">
+      ${positions.map((position) => `<span class="pip pip-${position}">${suitGlyph(suit)}</span>`).join("")}
+    </div>
+  `;
+}
+
+function faceCardMarkup(card) {
+  return `
+    <div class="face-layout">
+      <div class="face-rank-mark">${card.rank}</div>
+      <div class="face-suit-mark">${suitGlyph(card.suit)}</div>
+      <div class="face-rank-mark mirrored">${card.rank}</div>
+    </div>
+  `;
+}
+
+function jokerMarkup(card) {
+  return `
+    <div class="joker-layout ${card.suit === "Color" ? "color-joker" : "gray-joker"}">
+      <div class="joker-side">JOKER</div>
+      <div class="joker-center-mark">
+        <div class="joker-icon">${card.suit === "Color" ? "&#10022;" : "&#9822;"}</div>
+        <div class="joker-name">${card.suit === "Color" ? "COLOR" : "GRAY"}</div>
+      </div>
+      <div class="joker-side mirrored">JOKER</div>
+    </div>
+  `;
 }
 
 function sessionStoreKey() {
@@ -225,6 +277,30 @@ function cardMarkup(card) {
   `;
 }
 
+function deckStyleCardMarkup(card) {
+  if (!card) return "?";
+  const isRed = card.suit === "Heart" || card.suit === "Diamond";
+  const colorClass = isRed ? "red" : "black";
+  const center = card.rank === "Joker"
+    ? jokerMarkup(card)
+    : ["J", "Q", "K"].includes(card.rank)
+      ? faceCardMarkup(card)
+      : pipMarkup(card.rank, card.suit);
+  return `
+    <div class="card-face ${colorClass}">
+      <div class="card-corner top">
+        <div class="corner-rank">${card.rank}</div>
+        <div class="corner-suit">${suitGlyph(card.suit)}</div>
+      </div>
+      ${center}
+      <div class="card-corner bottom">
+        <div class="corner-rank">${card.rank}</div>
+        <div class="corner-suit">${suitGlyph(card.suit)}</div>
+      </div>
+    </div>
+  `;
+}
+
 function renderPlayed(el, card) {
   if (!card) {
     el.className = "played-card empty";
@@ -232,7 +308,7 @@ function renderPlayed(el, card) {
     return;
   }
   el.className = "played-card revealed";
-  el.innerHTML = cardMarkup(card);
+  el.innerHTML = deckStyleCardMarkup(card);
 }
 
 function hideActionPanels() {
@@ -312,7 +388,7 @@ function renderHand(room) {
     if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
       button.classList.add("muted");
     }
-    button.innerHTML = cardMarkup(card);
+    button.innerHTML = deckStyleCardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) return;
       if (room.phase === "discard") {
@@ -391,7 +467,7 @@ function renderRoom(room) {
     els.drawPanel.hidden = false;
     els.drawPrompt.textContent = room.drawPrompt;
     els.drawnCard.className = "played-card revealed";
-    els.drawnCard.innerHTML = cardMarkup(room.drawChoice.firstCard);
+    els.drawnCard.innerHTML = deckStyleCardMarkup(room.drawChoice.firstCard);
     els.keepFirst.disabled = state.loading;
     els.rejectFirst.disabled = state.loading;
   } else {
@@ -403,7 +479,7 @@ function renderRoom(room) {
     els.drawPreviewPanel.hidden = false;
     els.drawPreviewText.textContent = `You were forced to take ${roomCardLabel(state.previewCard)}.`;
     els.drawPreviewCard.className = "played-card revealed";
-    els.drawPreviewCard.innerHTML = cardMarkup(state.previewCard);
+    els.drawPreviewCard.innerHTML = deckStyleCardMarkup(state.previewCard);
   } else {
     els.drawPreviewCard.className = "played-card empty";
     els.drawPreviewCard.textContent = "?";

@@ -533,11 +533,9 @@ button:disabled {
   position: relative;
   width: 100%;
   min-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   color: #111827;
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .card-face.red {
@@ -581,6 +579,57 @@ button:disabled {
   text-align: center;
 }
 
+.pip-layout,
+.face-layout,
+.joker-layout {
+  position: absolute;
+  inset: 0;
+}
+
+.pip {
+  position: absolute;
+  font-size: 1.55em;
+  line-height: 1;
+}
+
+.pip-tl { top: 16%; left: 28%; transform: translate(-50%, -50%); }
+.pip-tr { top: 16%; left: 72%; transform: translate(-50%, -50%); }
+.pip-tc { top: 16%; left: 50%; transform: translate(-50%, -50%); }
+.pip-ml { top: 38%; left: 28%; transform: translate(-50%, -50%); }
+.pip-mr { top: 38%; left: 72%; transform: translate(-50%, -50%); }
+.pip-cc { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.pip-ict { top: 42%; left: 50%; transform: translate(-50%, -50%); }
+.pip-icb { top: 58%; left: 50%; transform: translate(-50%, -50%); }
+.pip-bl { top: 84%; left: 28%; transform: translate(-50%, -50%); }
+.pip-br { top: 84%; left: 72%; transform: translate(-50%, -50%); }
+.pip-bc { top: 84%; left: 50%; transform: translate(-50%, -50%); }
+
+.face-layout {
+  display: grid;
+  place-items: center;
+}
+
+.face-rank-mark {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  font-size: 2.2em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.face-rank-mark.mirrored {
+  top: auto;
+  bottom: 18%;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+.face-suit-mark {
+  font-size: 2.6em;
+  line-height: 1;
+}
+
 .center-rank {
   font-size: 2.35rem;
   font-weight: 700;
@@ -605,6 +654,45 @@ button:disabled {
   justify-items: center;
   gap: 6px;
   text-transform: uppercase;
+}
+
+.joker-layout {
+  display: grid;
+  grid-template-columns: 20px 1fr 20px;
+  align-items: center;
+}
+
+.joker-side {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.joker-side.mirrored {
+  transform: rotate(180deg);
+}
+
+.joker-center-mark {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.joker-icon {
+  font-size: 2.3em;
+  line-height: 1;
+}
+
+.joker-name {
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .joker-title {
@@ -695,7 +783,13 @@ button:disabled {
 
 .hand-card.muted .card-corner,
 .hand-card.muted .center-rank,
-.hand-card.muted .center-suit {
+.hand-card.muted .center-suit,
+.hand-card.muted .pip,
+.hand-card.muted .face-rank-mark,
+.hand-card.muted .face-suit-mark,
+.hand-card.muted .joker-side,
+.hand-card.muted .joker-icon,
+.hand-card.muted .joker-name {
   opacity: 0.68;
 }
 
@@ -878,6 +972,18 @@ button:disabled {
     font-size: 0.8rem;
   }
 
+  .pip {
+    font-size: 1.25em;
+  }
+
+  .face-rank-mark {
+    font-size: 1.7em;
+  }
+
+  .face-suit-mark {
+    font-size: 2em;
+  }
+
   .center-rank {
     font-size: 1.9rem;
   }
@@ -896,6 +1002,18 @@ button:disabled {
 
   .joker-subtitle {
     font-size: 0.72rem;
+  }
+
+  .joker-side {
+    font-size: 0.58em;
+  }
+
+  .joker-icon {
+    font-size: 1.8em;
+  }
+
+  .joker-name {
+    font-size: 0.7em;
   }
 
   .bid-buttons,
@@ -952,6 +1070,18 @@ button:disabled {
 
   .hand-card {
     border-radius: 12px;
+  }
+
+  .pip {
+    font-size: 1.05em;
+  }
+
+  .face-rank-mark {
+    font-size: 1.45em;
+  }
+
+  .face-suit-mark {
+    font-size: 1.7em;
   }
 
   .bid-buttons,
