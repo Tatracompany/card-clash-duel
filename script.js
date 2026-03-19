@@ -243,8 +243,9 @@ function renderHand(room) {
     button.style.setProperty("--offset", `${offset}`);
     button.style.setProperty("--lift", `${Math.abs(offset) * 5}px`);
     button.style.setProperty("--rotation", `${offset * 4.5}deg`);
+    button.style.zIndex = String(100 + index);
     if (state.selectedCardIds.includes(card.id)) {
-      button.classList.add("selected");
+      button.classList.add(room.phase === "discard" ? "discard-selected" : "selected");
     }
     if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
       button.classList.add("muted");

@@ -606,7 +606,14 @@ button:disabled {
   outline: 3px solid rgba(255, 214, 82, 0.95);
   transform: translateY(-16px) rotate(var(--rotation, 0deg));
   box-shadow: 0 16px 28px rgba(255, 215, 94, 0.28);
-  z-index: 3;
+  z-index: 220 !important;
+}
+
+.hand-card.discard-selected {
+  outline: 3px solid rgba(255, 214, 82, 0.8);
+  transform: translateY(12px) rotate(var(--rotation, 0deg));
+  box-shadow: 0 6px 10px rgba(20, 35, 51, 0.1);
+  z-index: 1 !important;
 }
 
 .hand-card.muted .card-face {
