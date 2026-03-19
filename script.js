@@ -97,11 +97,27 @@ function requireName() {
 
 function cardMarkup(card) {
   if (!card) return "?";
+  const isRed = card.suit === "Heart" || card.suit === "Diamond";
+  const colorClass = isRed ? "red" : "black";
+  const center = card.rank === "Joker"
+    ? `<div class="card-center joker-word">${card.suit}</div>`
+    : `
+      <div class="card-center">
+        <div class="center-rank">${card.rank}</div>
+        <div class="center-suit">${card.symbol}</div>
+      </div>
+    `;
   return `
-    <div class="card-face">
-      <div class="card-rank">${card.rank}</div>
-      <div class="card-suit">${card.symbol}</div>
-      <div class="card-power">${card.label}</div>
+    <div class="card-face ${colorClass}">
+      <div class="card-corner top">
+        <div class="corner-rank">${card.rank}</div>
+        <div class="corner-suit">${card.symbol}</div>
+      </div>
+      ${center}
+      <div class="card-corner bottom">
+        <div class="corner-rank">${card.rank}</div>
+        <div class="corner-suit">${card.symbol}</div>
+      </div>
     </div>
   `;
 }
@@ -150,11 +166,7 @@ function renderHand(room) {
     if (state.selectedCardId === card.id) {
       button.classList.add("selected");
     }
-    button.innerHTML = `
-      <div class="suit">${card.symbol}</div>
-      <div class="rank">${card.rank}</div>
-      <div class="power">${card.label}</div>
-    `;
+    button.innerHTML = cardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) {
         return;
