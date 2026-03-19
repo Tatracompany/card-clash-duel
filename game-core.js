@@ -290,6 +290,17 @@ function startDrawTurn(room) {
   room.phase = "draw";
 }
 
+function dealFinalRefillPair(room) {
+  if (room.deck.length === 2 && room.hands[0].length === 8 && room.hands[1].length === 8) {
+    room.hands[0].push(draw(room));
+    room.hands[1].push(draw(room));
+    room.drawChoice = null;
+    room.phase = "refillSummary";
+    return true;
+  }
+  return false;
+}
+
 function finishHand(room) {
   if (room.scores[room.contractor] >= room.contractTarget) {
     room.matchPoints[room.contractor] += room.contractTarget;
@@ -298,6 +309,9 @@ function finishHand(room) {
 }
 
 function startManualRefill(room) {
+  if (dealFinalRefillPair(room)) {
+    return;
+  }
   room.phase = "refill";
   room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
   startDrawTurn(room);
@@ -308,6 +322,10 @@ function advanceManualRefill(room) {
   if (bothFull || room.deck.length === 0) {
     room.phase = "refillSummary";
     room.drawChoice = null;
+    return;
+  }
+
+  if (dealFinalRefillPair(room)) {
     return;
   }
 
