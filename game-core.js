@@ -326,10 +326,16 @@ function startDrawTurn(room) {
   room.phase = "draw";
 }
 
+function otherPlayer(playerIndex) {
+  return playerIndex === 0 ? 1 : 0;
+}
+
 function dealFinalRefillPair(room) {
   if (room.deck.length === 2 && room.hands[0].length === 8 && room.hands[1].length === 8) {
-    room.hands[0].push(draw(room));
-    room.hands[1].push(draw(room));
+    const leadPlayer = room.currentPlayer ?? room.bidWinner ?? 0;
+    const followPlayer = otherPlayer(leadPlayer);
+    room.hands[leadPlayer].push(draw(room));
+    room.hands[followPlayer].push(draw(room));
     room.drawChoice = null;
     room.phase = "refillSummary";
     return true;
@@ -345,11 +351,14 @@ function finishHand(room) {
 }
 
 function startManualRefill(room) {
+  room.currentPlayer = room.bidWinner ?? 0;
   if (dealFinalRefillPair(room)) {
     return;
   }
   room.phase = "refill";
-  room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
+  if (room.hands[room.currentPlayer].length >= 9) {
+    room.currentPlayer = otherPlayer(room.currentPlayer);
+  }
   startDrawTurn(room);
 }
 
@@ -366,7 +375,7 @@ function advanceManualRefill(room) {
   }
 
   if (room.hands[0].length < 9 && room.hands[1].length < 9) {
-    room.currentPlayer = room.currentPlayer === 0 ? 1 : 0;
+    room.currentPlayer = otherPlayer(room.currentPlayer);
     startDrawTurn(room);
     return;
   }
