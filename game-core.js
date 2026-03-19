@@ -193,13 +193,17 @@ function buildHandInfo(room) {
 function buildPhaseTitle(room, playerIndex) {
   if (room.players.length < 2) return "Waiting For Opponent";
   const ownTurn = room.currentPlayer === playerIndex;
+  const ownDiscardDone = room.discardCounts[playerIndex] >= 3;
+  const otherDiscardDone = room.discardCounts[playerIndex === 0 ? 1 : 0] >= 3;
   switch (room.phase) {
     case "gameOver": return "Match Over";
     case "handSummary": return "Hand Summary";
     case "bid": return ownTurn ? "Your Bid" : "Opponent Bidding";
     case "bidReveal": return "Bid Result";
     case "chooseTrump": return room.bidWinner === playerIndex ? "Choose Trump" : "Opponent Choosing Trump";
-    case "discard": return ownTurn ? "Discard 3 Cards" : "Opponent Discarding";
+    case "discard":
+      if (!ownDiscardDone) return "Discard 3 Cards";
+      return otherDiscardDone ? "Discard Ready" : "Waiting For Opponent";
     case "draw": return ownTurn ? "Draw Choice" : "Opponent Draw Choice";
     case "refill": return ownTurn ? "Draw To 9" : "Opponent Drawing";
     case "refillSummary": return "Hands Ready";
@@ -212,6 +216,8 @@ function buildPhaseTitle(room, playerIndex) {
   function buildStatusText(room, playerIndex) {
   if (room.players.length < 2) return `Room ${room.roomCode} is waiting for a second player.`;
   const ownTurn = room.currentPlayer === playerIndex;
+  const ownDiscardDone = room.discardCounts[playerIndex] >= 3;
+  const otherDiscardDone = room.discardCounts[playerIndex === 0 ? 1 : 0] >= 3;
   switch (room.phase) {
     case "bid": {
       const high = Math.max(...room.bids.filter((v) => v !== null), 4);
@@ -226,7 +232,8 @@ function buildPhaseTitle(room, playerIndex) {
       case "chooseTrump":
         return room.bidWinner === playerIndex ? "Pick the strongest suit." : "Waiting for trump choice.";
       case "discard":
-        return ownTurn ? "Pick exactly 3 cards, then confirm the full discard." : "Waiting for the other player to discard.";
+        if (!ownDiscardDone) return "Pick exactly 3 cards, then confirm them together.";
+        return otherDiscardDone ? "Both discards are locked in." : "Waiting for the other player to finish discarding.";
     case "draw":
       return ownTurn ? "Keep the first card or reject it and take the second." : "Waiting for the other player's draw choice.";
       case "refill":
@@ -305,7 +312,9 @@ function buildRoomView(room, playerIndex) {
     actions: {
       canBid: room.phase === "bid" && room.currentPlayer === playerIndex,
       canChooseTrump: room.phase === "chooseTrump" && room.bidWinner === playerIndex,
-      canChooseHandCard: ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex,
+      canChooseHandCard: room.phase === "discard"
+        ? room.discardCounts[playerIndex] < 3
+        : room.phase === "play" && room.currentPlayer === playerIndex,
       canChooseDraw: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex,
       canContinue: ["bidReveal", "refillSummary", "reveal", "handSummary"].includes(room.phase),
     },
@@ -447,43 +456,45 @@ function applyAction(room, playerIndex, action, payload = {}) {
       return { ok: true };
     }
 
-  if (action === "choose_hand_card" && ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex) {
+  if (action === "choose_hand_card" && room.phase === "discard") {
     const hand = room.hands[playerIndex];
-
-    if (room.phase === "discard") {
-      const cardIds = Array.isArray(payload.cardIds) ? payload.cardIds : [];
-      if (cardIds.length !== 3) {
-        return { ok: false, error: "Choose exactly 3 cards to discard." };
-      }
-
-      const uniqueCardIds = [...new Set(cardIds)];
-      if (uniqueCardIds.length !== 3) {
-        return { ok: false, error: "Choose 3 different cards to discard." };
-      }
-
-      const discardCards = uniqueCardIds.map((cardId) => {
-        const index = hand.findIndex((card) => card.id === cardId);
-        return index === -1 ? null : hand[index];
-      });
-
-      if (discardCards.some((card) => !card)) {
-        return { ok: false, error: "One of the chosen cards is not in your hand." };
-      }
-
-      room.hands[playerIndex] = hand.filter((card) => !uniqueCardIds.includes(card.id));
-      room.discardPile.push(...discardCards);
-      room.discardCounts[playerIndex] = 3;
-
-      if (playerIndex === 0) {
-        room.currentPlayer = 1;
-      } else {
-        room.drawQueue = [room.bidWinner, room.bidWinner === 0 ? 1 : 0];
-        room.currentPlayer = room.drawQueue[0];
-        startDrawTurn(room);
-      }
-      room.updatedAt = Date.now();
-      return { ok: true };
+    if (room.discardCounts[playerIndex] >= 3) {
+      return { ok: false, error: "You already submitted your discard." };
     }
+    const cardIds = Array.isArray(payload.cardIds) ? payload.cardIds : [];
+    if (cardIds.length !== 3) {
+      return { ok: false, error: "Choose exactly 3 cards to discard." };
+    }
+
+    const uniqueCardIds = [...new Set(cardIds)];
+    if (uniqueCardIds.length !== 3) {
+      return { ok: false, error: "Choose 3 different cards to discard." };
+    }
+
+    const discardCards = uniqueCardIds.map((cardId) => {
+      const index = hand.findIndex((card) => card.id === cardId);
+      return index === -1 ? null : hand[index];
+    });
+
+    if (discardCards.some((card) => !card)) {
+      return { ok: false, error: "One of the chosen cards is not in your hand." };
+    }
+
+    room.hands[playerIndex] = hand.filter((card) => !uniqueCardIds.includes(card.id));
+    room.discardPile.push(...discardCards);
+    room.discardCounts[playerIndex] = 3;
+
+    if (room.discardCounts[0] >= 3 && room.discardCounts[1] >= 3) {
+      room.drawQueue = [room.bidWinner, room.bidWinner === 0 ? 1 : 0];
+      room.currentPlayer = room.drawQueue[0];
+      startDrawTurn(room);
+    }
+    room.updatedAt = Date.now();
+    return { ok: true };
+  }
+
+  if (action === "choose_hand_card" && room.phase === "play" && room.currentPlayer === playerIndex) {
+    const hand = room.hands[playerIndex];
 
     const index = hand.findIndex((card) => card.id === payload.cardId);
     if (index === -1) {

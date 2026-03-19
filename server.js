@@ -193,7 +193,8 @@ function chooseBotPlayCard(room, botIndex) {
 }
 
 function botMoveForRoom(room, botIndex) {
-  if (room.players.length < 2 || room.currentPlayer !== botIndex) return null;
+  if (room.players.length < 2) return null;
+  if (room.phase !== "discard" && room.currentPlayer !== botIndex) return null;
 
   switch (room.phase) {
     case "bid":
@@ -201,6 +202,7 @@ function botMoveForRoom(room, botIndex) {
     case "chooseTrump":
       return { action: "choose_trump", payload: { suit: chooseBotTrump(room, botIndex) } };
     case "discard":
+      if (room.discardCounts?.[botIndex] >= 3) return null;
       return { action: "choose_hand_card", payload: { cardIds: chooseBotDiscard(room, botIndex) } };
     case "draw":
     case "refill":

@@ -117,8 +117,13 @@ body {
   position: relative;
 }
 
+.opponent-zone {
+  margin-bottom: 24px;
+}
+
 .player-zone {
   padding-top: 8px;
+  margin-top: 22px;
 }
 
 .hand-side-hud {
@@ -239,7 +244,7 @@ body {
 }
 
 .table-middle {
-  padding: 0 72px 0 0;
+  padding: 18px 72px 18px 0;
 }
 
 .score-ribbon {
@@ -984,6 +989,14 @@ button:disabled {
     padding-bottom: 6px;
   }
 
+  .opponent-zone {
+    margin-bottom: 16px;
+  }
+
+  .player-zone {
+    margin-top: 14px;
+  }
+
   .card-back {
     width: 48px;
     height: 72px;
@@ -1001,6 +1014,10 @@ button:disabled {
   .trick-card.played-card {
     width: 68px;
     min-height: 96px;
+  }
+
+  .table-middle {
+    padding: 12px 68px 8px 0;
   }
 
   .trick-card-opponent {
@@ -1105,6 +1122,14 @@ button:disabled {
     min-height: 80px;
   }
 
+  .opponent-zone {
+    margin-bottom: 12px;
+  }
+
+  .player-zone {
+    margin-top: 10px;
+  }
+
   .hand-card {
     border-radius: 12px;
   }
@@ -1123,6 +1148,10 @@ button:disabled {
 
   .table-floaters {
     bottom: 92px;
+  }
+
+  .table-middle {
+    padding: 8px 62px 6px 0;
   }
 
   .trump-floater {
