@@ -41,6 +41,8 @@ const els = {
 
 const bidButtons = Array.from(document.querySelectorAll(".bid-button"));
 const suitButtons = Array.from(document.querySelectorAll(".suit-button"));
+const suitOrder = { Heart: 0, Diamond: 1, Spade: 2, Clover: 3, Gray: 4, Color: 5 };
+const rankOrder = { A: 0, K: 1, Q: 2, J: 3, 10: 4, 9: 5, 8: 6, 7: 7, 6: 8, Joker: 9 };
 
 function loadSession() {
   try {
@@ -116,7 +118,15 @@ function hideActionPanels() {
 
 function renderHand(room) {
   els.hand.innerHTML = "";
-  room.yourHand.forEach((card) => {
+  const sortedHand = [...room.yourHand].sort((left, right) => {
+    const suitDiff = (suitOrder[left.suit] ?? 99) - (suitOrder[right.suit] ?? 99);
+    if (suitDiff !== 0) {
+      return suitDiff;
+    }
+    return (rankOrder[left.rank] ?? 99) - (rankOrder[right.rank] ?? 99);
+  });
+
+  sortedHand.forEach((card) => {
     const button = document.createElement("button");
     button.className = "hand-card";
     button.type = "button";
