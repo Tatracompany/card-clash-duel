@@ -71,9 +71,9 @@ body {
 
 .table-board {
   background:
-    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.06), transparent 26%),
-    linear-gradient(180deg, #1d4a53, #102c33);
-  color: #f2f6f5;
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.65), transparent 30%),
+    linear-gradient(180deg, #f5fbfc, #e4eef1);
+  color: #20303d;
   overflow: hidden;
 }
 
@@ -89,7 +89,7 @@ body {
 
 .zone-role {
   margin: 0 0 6px;
-  color: rgba(233, 241, 239, 0.88);
+  color: #4b6472;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -97,7 +97,7 @@ body {
 
 .zone-hint,
 .player-zone #handHint {
-  color: rgba(228, 238, 236, 0.92);
+  color: #5b707e;
 }
 
 .opponent-zone h2,
@@ -105,7 +105,7 @@ body {
 .table-callout h2,
 .reveal-slot h3,
 .compact h2 {
-  color: #ffffff;
+  color: #22313d;
 }
 
 .opponent-hand {
@@ -178,8 +178,8 @@ body {
 .score-card.compact {
   min-width: 150px;
   padding: 16px 18px;
-  background: rgba(10, 24, 28, 0.34);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(102, 119, 131, 0.42);
+  border-color: rgba(43, 63, 75, 0.12);
   box-shadow: none;
 }
 
@@ -194,7 +194,7 @@ body {
 }
 
 .table-callout p {
-  color: rgba(238, 244, 243, 0.96);
+  color: #4c606d;
 }
 
 .trick-arena {
@@ -217,7 +217,7 @@ body {
   height: 82px;
   border-radius: 24px;
   background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.28), transparent 35%),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 35%),
     linear-gradient(135deg, rgba(255, 196, 87, 0.9), rgba(212, 86, 42, 0.92));
   filter: blur(0.5px);
   box-shadow: 0 0 22px rgba(255, 184, 84, 0.2);
@@ -225,13 +225,18 @@ body {
 
 .arena-label {
   position: absolute;
-  bottom: 0;
+  bottom: -12px;
   margin: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(222, 135, 68, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(248, 248, 245, 0.95);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: #8f431f;
+  box-shadow: 0 8px 18px rgba(212, 126, 55, 0.16);
 }
 
 .hero,
