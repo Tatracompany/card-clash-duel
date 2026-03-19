@@ -29,7 +29,6 @@ const els = {
   handTitle: $("handTitle"),
   handHint: $("handHint"),
   hand: $("handContainer"),
-  continue: $("continueButton"),
   copyInvite: $("copyInviteButton"),
   confirmCard: $("confirmCardButton"),
   bidPanel: $("bidPanel"),
@@ -257,8 +256,6 @@ function renderRoom(room) {
   renderOpponentHand(room);
   renderHand(room);
 
-  els.continue.hidden = !room.actions.canContinue;
-  els.continue.disabled = !room.actions.canContinue || state.loading;
   els.copyInvite.hidden = !room.roomCode;
   els.copyInvite.disabled = state.loading || !room.roomCode;
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
@@ -316,12 +313,6 @@ $("createRoomButton").addEventListener("click", () => {
   state.loading = true;
   render();
   send("create_room", { name: state.guestName });
-});
-
-els.continue.addEventListener("click", () => {
-  state.loading = true;
-  render();
-  send("action", { action: "continue" });
 });
 
 els.copyInvite.addEventListener("click", async () => {

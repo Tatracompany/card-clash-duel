@@ -15,7 +15,9 @@ const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 const ROOT = __dirname;
 const rooms = new Map();
+const autoAdvanceTimers = new Map();
 let waitingSocket = null;
+const AUTO_ADVANCE_PHASES = new Set(["bidReveal", "refillSummary", "reveal", "handSummary"]);
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -39,11 +41,50 @@ function buildViewForSocket(room, socket) {
   return buildRoomView(room, socket.playerIndex);
 }
 
+function clearRoomTimer(roomCode) {
+  const timer = autoAdvanceTimers.get(roomCode);
+  if (timer) {
+    clearTimeout(timer);
+    autoAdvanceTimers.delete(roomCode);
+  }
+}
+
+function scheduleAutoAdvance(room) {
+  clearRoomTimer(room.roomCode);
+  if (room.players.length < 2 || !AUTO_ADVANCE_PHASES.has(room.phase)) {
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    const liveRoom = rooms.get(room.roomCode);
+    if (!liveRoom || liveRoom.players.length < 2 || !AUTO_ADVANCE_PHASES.has(liveRoom.phase)) {
+      clearRoomTimer(room.roomCode);
+      return;
+    }
+
+    const result = applyAction(liveRoom, 0, "continue", {});
+    if (result.ok) {
+      broadcast(liveRoom);
+    } else {
+      clearRoomTimer(room.roomCode);
+    }
+  }, liveRoomDelay(room.phase));
+
+  autoAdvanceTimers.set(room.roomCode, timer);
+}
+
+function liveRoomDelay(phase) {
+  if (phase === "handSummary") return 2200;
+  if (phase === "reveal") return 1600;
+  return 1200;
+}
+
 function broadcast(room) {
   room.players.forEach((player, index) => {
     player.socket.playerIndex = index;
     send(player.socket, { type: "room_state", room: buildRoomView(room, index) });
   });
+  scheduleAutoAdvance(room);
 }
 
 function createAndAttachRoom(socket, name) {
@@ -84,10 +125,12 @@ function cleanupSocket(socket) {
 
   room.players = room.players.filter((player) => player.id !== socket.playerId);
   if (room.players.length === 0) {
+    clearRoomTimer(room.roomCode);
     rooms.delete(room.roomCode);
     return;
   }
 
+  clearRoomTimer(room.roomCode);
   room.phase = "waiting";
   room.currentPlayer = 0;
   room.updatedAt = Date.now();
