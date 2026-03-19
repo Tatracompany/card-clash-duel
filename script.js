@@ -7,6 +7,8 @@ const state = {
   previewCard: null,
   lastDrawResultNonce: 0,
   previewTimer: null,
+  reconnectTimer: null,
+  reconnectAttempts: 0,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -56,6 +58,52 @@ function setBanner(text) {
   els.banner.textContent = text;
 }
 
+function sessionStoreKey() {
+  return "card-clash-room-sessions";
+}
+
+function readSessions() {
+  try {
+    return JSON.parse(localStorage.getItem(sessionStoreKey()) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveRoomSession(roomCode, session) {
+  if (!roomCode || !session?.playerId || !session?.token) return;
+  const sessions = readSessions();
+  sessions[roomCode] = session;
+  localStorage.setItem(sessionStoreKey(), JSON.stringify(sessions));
+}
+
+function getRoomSession(roomCode) {
+  if (!roomCode) return null;
+  const sessions = readSessions();
+  return sessions[roomCode] || null;
+}
+
+function clearRoomSession(roomCode) {
+  if (!roomCode) return;
+  const sessions = readSessions();
+  delete sessions[roomCode];
+  localStorage.setItem(sessionStoreKey(), JSON.stringify(sessions));
+}
+
+function currentRoomCode() {
+  return state.room?.roomCode || new URLSearchParams(location.search).get("room") || "";
+}
+
+function scheduleReconnect() {
+  if (state.reconnectTimer) return;
+  const delay = Math.min(4000, 1200 + state.reconnectAttempts * 600);
+  state.reconnectTimer = setTimeout(() => {
+    state.reconnectTimer = null;
+    state.reconnectAttempts += 1;
+    connect();
+  }, delay);
+}
+
 function showDrawPreview(card) {
   state.previewCard = card;
   if (state.previewTimer) {
@@ -92,23 +140,33 @@ function connect() {
   state.socket = new WebSocket(`${protocol}//${location.host}`);
 
   state.socket.addEventListener("open", () => {
+    state.reconnectAttempts = 0;
     setBanner("Connected. Start a private room or use quick match.");
     const roomCode = new URLSearchParams(location.search).get("room");
     if (roomCode) {
       state.loading = true;
       render();
-      send("join_room", { name: state.guestName, roomCode: roomCode.toUpperCase() });
+      const savedSession = getRoomSession(roomCode.toUpperCase());
+      if (savedSession) {
+        send("resume_room", { roomCode: roomCode.toUpperCase(), ...savedSession });
+      } else {
+        send("join_room", { name: state.guestName, roomCode: roomCode.toUpperCase() });
+      }
     }
   });
 
   state.socket.addEventListener("close", () => {
-    setBanner("Disconnected. Refresh the page to reconnect.");
+    setBanner("Disconnected. Trying to reconnect...");
+    scheduleReconnect();
   });
 
   state.socket.addEventListener("message", (event) => {
     const message = JSON.parse(event.data);
     if (message.type === "info" || message.type === "error") {
       state.loading = false;
+      if (message.type === "error" && message.message === "Could not restore your seat.") {
+        clearRoomSession(currentRoomCode().toUpperCase());
+      }
       setBanner(message.message);
       render();
       return;
@@ -116,6 +174,9 @@ function connect() {
     if (message.type === "room_state") {
       state.room = message.room;
       state.loading = false;
+       if (state.room.session) {
+        saveRoomSession(state.room.roomCode, state.room.session);
+      }
       const handIds = new Set(state.room.yourHand.map((card) => card.id));
       state.selectedCardIds = state.selectedCardIds.filter((cardId) => handIds.has(cardId));
       if (state.room.phase !== "discard" && state.selectedCardIds.length > 1) {

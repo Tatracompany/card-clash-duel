@@ -17,8 +17,10 @@ const ROOT = __dirname;
 const rooms = new Map();
 const autoAdvanceTimers = new Map();
 const botTimers = new Map();
+const disconnectTimers = new Map();
 let waitingSocket = null;
 const AUTO_ADVANCE_PHASES = new Set(["bidReveal", "refillSummary", "reveal", "handSummary"]);
+const RECONNECT_GRACE_MS = 120000;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -55,6 +57,19 @@ function clearBotTimer(roomCode) {
   if (timer) {
     clearTimeout(timer);
     botTimers.delete(roomCode);
+  }
+}
+
+function disconnectTimerKey(roomCode, playerId) {
+  return `${roomCode}:${playerId}`;
+}
+
+function clearDisconnectTimer(roomCode, playerId) {
+  const key = disconnectTimerKey(roomCode, playerId);
+  const timer = disconnectTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    disconnectTimers.delete(key);
   }
 }
 
@@ -250,11 +265,7 @@ function broadcast(room) {
 function createAndAttachRoom(socket, name) {
   const room = createRoom();
   const player = attachPlayer(room, name);
-  room.players[0].socket = socket;
-  socket.roomCode = room.roomCode;
-  socket.playerIndex = 0;
-  socket.playerId = player.id;
-  socket.playerToken = player.token;
+  attachSocketToPlayer(room, 0, socket);
   rooms.set(room.roomCode, room);
   return { room, player };
 }
@@ -268,15 +279,29 @@ function addBotPlayer(room, name = "Bot") {
 
 function joinExistingRoom(room, socket, name) {
   const player = attachPlayer(room, name);
-  room.players[room.players.length - 1].socket = socket;
-  socket.roomCode = room.roomCode;
-  socket.playerIndex = room.players.length - 1;
-  socket.playerId = player.id;
-  socket.playerToken = player.token;
+  attachSocketToPlayer(room, room.players.length - 1, socket);
   if (room.players.length === 2 && room.phase === "waiting") {
     startHand(room);
   }
   return player;
+}
+
+function attachSocketToPlayer(room, playerIndex, socket) {
+  const player = room.players[playerIndex];
+  player.socket = socket;
+  player.disconnectedAt = null;
+  socket.roomCode = room.roomCode;
+  socket.playerIndex = playerIndex;
+  socket.playerId = player.id;
+  socket.playerToken = player.token;
+  clearDisconnectTimer(room.roomCode, player.id);
+  return player;
+}
+
+function resumeExistingPlayer(room, socket, playerId, token) {
+  const playerIndex = room.players.findIndex((player) => player.id === playerId && player.token === token);
+  if (playerIndex === -1) return null;
+  return attachSocketToPlayer(room, playerIndex, socket);
 }
 
 function removeWaitingSocket(socket) {
@@ -289,23 +314,48 @@ function cleanupSocket(socket) {
   removeWaitingSocket(socket);
   const room = roomForSocket(socket);
   if (!room) return;
+  const player = room.players.find((entry) => entry.id === socket.playerId);
+  if (!player || player.isBot) return;
 
-  room.players = room.players.filter((player) => player.id !== socket.playerId);
-  const humansLeft = room.players.filter((player) => !player.isBot);
-  if (room.players.length === 0 || humansLeft.length === 0) {
-    clearRoomTimer(room.roomCode);
-    clearBotTimer(room.roomCode);
-    rooms.delete(room.roomCode);
-    return;
-  }
-
-  clearRoomTimer(room.roomCode);
-  clearBotTimer(room.roomCode);
-  room.players = room.players.filter((player) => !player.isBot);
-  room.phase = "waiting";
-  room.currentPlayer = 0;
+  player.socket = null;
+  player.disconnectedAt = Date.now();
   room.updatedAt = Date.now();
   broadcast(room);
+
+  const key = disconnectTimerKey(room.roomCode, player.id);
+  clearDisconnectTimer(room.roomCode, player.id);
+  const timer = setTimeout(() => {
+    const liveRoom = rooms.get(room.roomCode);
+    if (!liveRoom) {
+      disconnectTimers.delete(key);
+      return;
+    }
+    const livePlayer = liveRoom.players.find((entry) => entry.id === player.id);
+    if (!livePlayer || livePlayer.socket) {
+      disconnectTimers.delete(key);
+      return;
+    }
+
+    liveRoom.players = liveRoom.players.filter((entry) => entry.id !== player.id);
+    const humansLeft = liveRoom.players.filter((entry) => !entry.isBot);
+    if (liveRoom.players.length === 0 || humansLeft.length === 0) {
+      clearRoomTimer(liveRoom.roomCode);
+      clearBotTimer(liveRoom.roomCode);
+      rooms.delete(liveRoom.roomCode);
+      disconnectTimers.delete(key);
+      return;
+    }
+
+    if (liveRoom.players.some((entry) => entry.isBot)) {
+      liveRoom.players = liveRoom.players.filter((entry) => !entry.isBot);
+      liveRoom.phase = "waiting";
+      liveRoom.currentPlayer = 0;
+    }
+    liveRoom.updatedAt = Date.now();
+    disconnectTimers.delete(key);
+    broadcast(liveRoom);
+  }, RECONNECT_GRACE_MS);
+  disconnectTimers.set(key, timer);
 }
 
 const server = http.createServer((req, res) => {
@@ -354,6 +404,22 @@ wss.on("connection", (socket) => {
       }
       const { room } = createAndAttachRoom(socket, name);
       send(socket, { type: "info", message: `Room ${room.roomCode} created. Waiting for another player.` });
+      broadcast(room);
+      return;
+    }
+
+    if (message.type === "resume_room") {
+      const room = rooms.get(String(message.roomCode || "").toUpperCase());
+      if (!room) {
+        send(socket, { type: "error", message: "Previous room is no longer available." });
+        return;
+      }
+      const player = resumeExistingPlayer(room, socket, String(message.playerId || ""), String(message.token || ""));
+      if (!player) {
+        send(socket, { type: "error", message: "Could not restore your seat." });
+        return;
+      }
+      send(socket, { type: "info", message: `Reconnected to room ${room.roomCode}.` });
       broadcast(room);
       return;
     }

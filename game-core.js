@@ -275,6 +275,10 @@ function buildRoomView(room, playerIndex) {
   return {
     phase: room.phase,
     roomCode: room.roomCode,
+    session: {
+      playerId: room.players[playerIndex]?.id || "",
+      token: room.players[playerIndex]?.token || "",
+    },
     you: { name: room.players[playerIndex]?.name || "You" },
     opponent: room.players[playerIndex === 0 ? 1 : 0] ? { name: room.players[playerIndex === 0 ? 1 : 0].name } : null,
     opponentHandCount: room.players[playerIndex === 0 ? 1 : 0] ? room.hands[playerIndex === 0 ? 1 : 0].length : 0,
