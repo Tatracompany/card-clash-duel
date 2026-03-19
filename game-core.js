@@ -272,6 +272,7 @@ function buildRoomView(room, playerIndex) {
       canBid: room.phase === "bid" && room.currentPlayer === playerIndex,
       canChooseTrump: room.phase === "chooseTrump" && room.bidWinner === playerIndex,
       canChooseHandCard: ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex,
+      canDrawOne: room.phase === "refill" && room.currentPlayer === playerIndex,
       canChooseDraw: room.phase === "draw" && room.currentPlayer === playerIndex,
       canContinue: ["bidReveal", "refillSummary", "reveal", "handSummary"].includes(room.phase),
     },

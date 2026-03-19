@@ -1,10 +1,6 @@
-const SESSION_KEY = "card-clash-session";
-const POLL_MS = 2000;
-
 const state = {
+  socket: null,
   room: null,
-  session: loadSession(),
-  pollTimer: null,
   loading: false,
   selectedCardId: null,
 };
@@ -50,40 +46,47 @@ const suitButtons = Array.from(document.querySelectorAll(".suit-button"));
 const suitOrder = { Heart: 0, Diamond: 1, Spade: 2, Clover: 3, Gray: 4, Color: 5 };
 const rankOrder = { A: 0, K: 1, Q: 2, J: 3, 10: 4, 9: 5, 8: 6, 7: 7, 6: 8, Joker: 9 };
 
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSession(session) {
-  state.session = session;
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-}
-
-function clearSession() {
-  state.session = null;
-  localStorage.removeItem(SESSION_KEY);
-}
-
 function setBanner(text) {
   els.banner.textContent = text;
 }
 
-async function api(method, payload = null, query = "") {
-  const response = await fetch(`/api/game${query}`, {
-    method,
-    headers: method === "POST" ? { "Content-Type": "application/json" } : undefined,
-    body: method === "POST" ? JSON.stringify(payload) : undefined,
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Request failed.");
+function send(type, payload = {}) {
+  if (!state.socket || state.socket.readyState !== WebSocket.OPEN) {
+    setBanner("Connection lost. Refresh to reconnect.");
+    return;
   }
-  return data;
+  state.socket.send(JSON.stringify({ type, ...payload }));
+}
+
+function connect() {
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  state.socket = new WebSocket(`${protocol}//${location.host}`);
+
+  state.socket.addEventListener("open", () => {
+    setBanner("Connected. Create a room, join a room, or use quick match.");
+  });
+
+  state.socket.addEventListener("close", () => {
+    setBanner("Disconnected. Refresh the page to reconnect.");
+  });
+
+  state.socket.addEventListener("message", (event) => {
+    const message = JSON.parse(event.data);
+    if (message.type === "info" || message.type === "error") {
+      state.loading = false;
+      setBanner(message.message);
+      render();
+      return;
+    }
+    if (message.type === "room_state") {
+      state.room = message.room;
+      state.loading = false;
+      if (!state.room.yourHand.some((card) => card.id === state.selectedCardId)) {
+        state.selectedCardId = null;
+      }
+      render();
+    }
+  });
 }
 
 function requireName() {
@@ -139,43 +142,9 @@ function hideActionPanels() {
 }
 
 function getConfirmCardLabel(room) {
-  if (room.phase === "discard") {
-    return "Discard Selected Card";
-  }
-  if (room.phase === "play") {
-    return "Play Selected Card";
-  }
+  if (room.phase === "discard") return "Discard Selected Card";
+  if (room.phase === "play") return "Play Selected Card";
   return "Confirm Card";
-}
-
-function renderHand(room) {
-  els.hand.innerHTML = "";
-  const sortedHand = [...room.yourHand].sort((left, right) => {
-    const suitDiff = (suitOrder[left.suit] ?? 99) - (suitOrder[right.suit] ?? 99);
-    if (suitDiff !== 0) {
-      return suitDiff;
-    }
-    return (rankOrder[left.rank] ?? 99) - (rankOrder[right.rank] ?? 99);
-  });
-
-  sortedHand.forEach((card) => {
-    const button = document.createElement("button");
-    button.className = "hand-card";
-    button.type = "button";
-    button.disabled = !room.actions.canChooseHandCard || state.loading;
-    if (state.selectedCardId === card.id) {
-      button.classList.add("selected");
-    }
-    button.innerHTML = cardMarkup(card);
-    button.addEventListener("click", () => {
-      if (!room.actions.canChooseHandCard || state.loading) {
-        return;
-      }
-      state.selectedCardId = card.id;
-      render();
-    });
-    els.hand.appendChild(button);
-  });
 }
 
 function renderOpponentHand(room) {
@@ -196,6 +165,32 @@ function renderOpponentHand(room) {
     counter.textContent = `+${total - 8}`;
     els.opponentHand.appendChild(counter);
   }
+}
+
+function renderHand(room) {
+  els.hand.innerHTML = "";
+  const sortedHand = [...room.yourHand].sort((left, right) => {
+    const suitDiff = (suitOrder[left.suit] ?? 99) - (suitOrder[right.suit] ?? 99);
+    if (suitDiff !== 0) return suitDiff;
+    return (rankOrder[left.rank] ?? 99) - (rankOrder[right.rank] ?? 99);
+  });
+
+  sortedHand.forEach((card) => {
+    const button = document.createElement("button");
+    button.className = "hand-card";
+    button.type = "button";
+    button.disabled = !room.actions.canChooseHandCard || state.loading;
+    if (state.selectedCardId === card.id) {
+      button.classList.add("selected");
+    }
+    button.innerHTML = cardMarkup(card);
+    button.addEventListener("click", () => {
+      if (!room.actions.canChooseHandCard || state.loading) return;
+      state.selectedCardId = card.id;
+      render();
+    });
+    els.hand.appendChild(button);
+  });
 }
 
 function renderRoom(room) {
@@ -225,8 +220,8 @@ function renderRoom(room) {
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
   els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
   els.confirmCard.textContent = getConfirmCardLabel(room);
-  els.drawOne.hidden = room.phase !== "refill" || !room.actions.canChooseHandCard;
-  els.drawOne.disabled = room.phase !== "refill" || !room.actions.canChooseHandCard || state.loading;
+  els.drawOne.hidden = !room.actions.canDrawOne;
+  els.drawOne.disabled = !room.actions.canDrawOne || state.loading;
 
   if (room.actions.canBid) {
     els.bidPanel.hidden = false;
@@ -266,138 +261,82 @@ function render() {
   renderRoom(state.room);
 }
 
-async function syncState() {
-  if (!state.session) return;
-  try {
-    const params = new URLSearchParams({
-      op: "state",
-      roomCode: state.session.roomCode,
-      playerId: state.session.playerId,
-      token: state.session.token,
-    });
-    const data = await api("GET", null, `?${params.toString()}`);
-    state.room = data.room;
-    if (!state.room.yourHand.some((card) => card.id === state.selectedCardId)) {
-      state.selectedCardId = null;
-    }
-    render();
-  } catch (error) {
-    setBanner(error.message);
-  }
-}
-
-function startPolling() {
-  stopPolling();
-  state.pollTimer = setInterval(syncState, POLL_MS);
-}
-
-function stopPolling() {
-  if (state.pollTimer) {
-    clearInterval(state.pollTimer);
-    state.pollTimer = null;
-  }
-}
-
-async function beginSession(op, payload) {
-  state.loading = true;
-  render();
-  try {
-    const data = await api("POST", { op, ...payload });
-    saveSession({
-      roomCode: data.roomCode,
-      playerId: data.playerId,
-      token: data.token,
-      name: payload.name,
-    });
-    state.room = data.room;
-    state.selectedCardId = null;
-    startPolling();
-    setBanner("Connected to room.");
-  } catch (error) {
-    setBanner(error.message);
-  } finally {
-    state.loading = false;
-    render();
-  }
-}
-
-async function performAction(action, payload = {}) {
-  if (!state.session) return;
-  state.loading = true;
-  render();
-  try {
-    const data = await api("POST", {
-      op: "action",
-      roomCode: state.session.roomCode,
-      playerId: state.session.playerId,
-      token: state.session.token,
-      action,
-      payload,
-    });
-    state.room = data.room;
-    state.selectedCardId = null;
-  } catch (error) {
-    setBanner(error.message);
-  } finally {
-    state.loading = false;
-    render();
-  }
-}
-
-async function restoreSession() {
-  if (!state.session) {
-    render();
-    return;
-  }
-  els.name.value = state.session.name || "";
-  await syncState();
-  startPolling();
-}
-
 $("quickMatchButton").addEventListener("click", () => {
   const name = requireName();
-  if (name) beginSession("quick_match", { name });
+  if (!name) return;
+  state.loading = true;
+  render();
+  send("quick_match", { name });
 });
 
 $("createRoomButton").addEventListener("click", () => {
   const name = requireName();
-  if (name) beginSession("create_room", { name });
+  if (!name) return;
+  state.loading = true;
+  render();
+  send("create_room", { name });
 });
 
 $("joinRoomButton").addEventListener("click", () => {
   const name = requireName();
+  if (!name) return;
   const roomCode = els.roomCodeInput.value.trim().toUpperCase();
   if (!roomCode) {
     setBanner("Enter a room code to join.");
     return;
   }
-  beginSession("join_room", { name, roomCode });
+  state.loading = true;
+  render();
+  send("join_room", { name, roomCode });
 });
 
-els.continue.addEventListener("click", () => performAction("continue"));
-els.confirmCard.addEventListener("click", () => {
-  if (!state.selectedCardId) {
-    return;
-  }
-  performAction("choose_hand_card", { cardId: state.selectedCardId });
+els.continue.addEventListener("click", () => {
+  state.loading = true;
+  render();
+  send("action", { action: "continue" });
 });
-els.drawOne.addEventListener("click", () => performAction("draw_one_card"));
-els.keepFirst.addEventListener("click", () => performAction("draw_keep_first"));
-els.rejectFirst.addEventListener("click", () => performAction("draw_reject_first"));
+
+els.confirmCard.addEventListener("click", () => {
+  if (!state.selectedCardId) return;
+  state.loading = true;
+  render();
+  send("action", { action: "choose_hand_card", payload: { cardId: state.selectedCardId } });
+});
+
+els.drawOne.addEventListener("click", () => {
+  state.loading = true;
+  render();
+  send("action", { action: "draw_one_card" });
+});
+
+els.keepFirst.addEventListener("click", () => {
+  state.loading = true;
+  render();
+  send("action", { action: "draw_keep_first" });
+});
+
+els.rejectFirst.addEventListener("click", () => {
+  state.loading = true;
+  render();
+  send("action", { action: "draw_reject_first" });
+});
 
 bidButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const bid = button.dataset.bid;
-    performAction("choose_bid", { bid: bid === "pass" ? "pass" : Number(bid) });
+    state.loading = true;
+    render();
+    send("action", { action: "choose_bid", payload: { bid: bid === "pass" ? "pass" : Number(bid) } });
   });
 });
 
 suitButtons.forEach((button) => {
-  button.addEventListener("click", () => performAction("choose_trump", { suit: button.dataset.suit }));
+  button.addEventListener("click", () => {
+    state.loading = true;
+    render();
+    send("action", { action: "choose_trump", payload: { suit: button.dataset.suit } });
+  });
 });
 
-window.addEventListener("beforeunload", () => {
-  stopPolling();
-});
-
-restoreSession();
+connect();
+render();
