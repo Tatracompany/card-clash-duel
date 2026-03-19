@@ -34,6 +34,7 @@ const els = {
   hand: $("handContainer"),
   continue: $("continueButton"),
   confirmCard: $("confirmCardButton"),
+  drawOne: $("drawOneButton"),
   bidPanel: $("bidPanel"),
   suitPanel: $("suitPickerPanel"),
   suitText: $("suitPickerText"),
@@ -212,6 +213,8 @@ function renderRoom(room) {
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
   els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
   els.confirmCard.textContent = getConfirmCardLabel(room);
+  els.drawOne.hidden = room.phase !== "refill" || !room.actions.canChooseHandCard;
+  els.drawOne.disabled = room.phase !== "refill" || !room.actions.canChooseHandCard || state.loading;
 
   if (room.actions.canBid) {
     els.bidPanel.hidden = false;
@@ -366,6 +369,7 @@ els.confirmCard.addEventListener("click", () => {
   }
   performAction("choose_hand_card", { cardId: state.selectedCardId });
 });
+els.drawOne.addEventListener("click", () => performAction("draw_one_card"));
 els.keepFirst.addEventListener("click", () => performAction("draw_keep_first"));
 els.rejectFirst.addEventListener("click", () => performAction("draw_reject_first"));
 

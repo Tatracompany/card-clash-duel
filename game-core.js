@@ -183,7 +183,8 @@ function buildPhaseTitle(room, playerIndex) {
     case "chooseTrump": return room.bidWinner === playerIndex ? "Choose Trump" : "Opponent Choosing Trump";
     case "discard": return ownTurn ? "Discard 3 Cards" : "Opponent Discarding";
     case "draw": return ownTurn ? "Draw Choice" : "Opponent Draw Choice";
-    case "refillSummary": return "Hands Refilled";
+    case "refill": return ownTurn ? "Draw To 9" : "Opponent Drawing";
+    case "refillSummary": return "Hands Ready";
     case "play": return ownTurn ? `Trick ${room.roundsPlayed + 1}: Your Turn` : `Trick ${room.roundsPlayed + 1}: Opponent Turn`;
     case "reveal": return `Trick ${room.roundsPlayed} Result`;
     default: return "Room";
@@ -210,8 +211,10 @@ function buildStatusText(room, playerIndex) {
       return ownTurn ? `Discard ${3 - room.discardCounts[playerIndex]} more card(s).` : "Waiting for the other player to discard.";
     case "draw":
       return ownTurn ? "Keep the first card or reject it and take the second." : "Waiting for the other player's draw choice.";
+    case "refill":
+      return ownTurn ? "Draw one card from the deck." : "Waiting for the other player to draw.";
     case "refillSummary":
-      return "Both hands are back to 9 cards.";
+      return "Both players reached 9 cards. The hand is ready.";
     case "play":
       return ownTurn ? "Choose one card for this trick." : room.selectedCards[0] ? "Waiting for the trick to resolve." : "Waiting for the first play.";
     case "reveal":
@@ -234,6 +237,7 @@ function buildStatusText(room, playerIndex) {
 function buildHandHint(room, playerIndex) {
   if (room.players.length < 2) return "Share the room code or send the Netlify URL to your friend.";
   if (room.phase === "discard" || room.phase === "play") return `${room.hands[playerIndex].length} card(s) in your hand.`;
+  if (room.phase === "refill") return `${room.hands[playerIndex].length} of 9 cards ready.`;
   if (room.phase === "draw") return "If you keep the first card, the second is discarded unseen.";
   if (room.phase === "handSummary") return "Continue to deal the next hand unless someone reached 21.";
   return "Only your own hand is visible on this phone.";
@@ -284,6 +288,26 @@ function finishHand(room) {
     room.matchPoints[room.contractor] += room.contractTarget;
   }
   room.phase = room.matchPoints[0] >= 21 || room.matchPoints[1] >= 21 ? "gameOver" : "handSummary";
+}
+
+function startManualRefill(room) {
+  room.phase = "refill";
+  room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
+}
+
+function advanceManualRefill(room) {
+  const bothFull = room.hands[0].length >= 9 && room.hands[1].length >= 9;
+  if (bothFull || room.deck.length === 0) {
+    room.phase = "refillSummary";
+    return;
+  }
+
+  if (room.hands[0].length < 9 && room.hands[1].length < 9) {
+    room.currentPlayer = room.currentPlayer === 0 ? 1 : 0;
+    return;
+  }
+
+  room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
 }
 
 function applyAction(room, playerIndex, action, payload = {}) {
@@ -416,9 +440,21 @@ function applyAction(room, playerIndex, action, payload = {}) {
       startDrawTurn(room);
     } else {
       room.drawChoice = null;
-      refillHands(room);
-      room.phase = "refillSummary";
+      startManualRefill(room);
     }
+    room.updatedAt = Date.now();
+    return { ok: true };
+  }
+
+  if (action === "draw_one_card" && room.phase === "refill" && room.currentPlayer === playerIndex) {
+    const card = draw(room);
+    if (!card) {
+      room.phase = "refillSummary";
+      room.updatedAt = Date.now();
+      return { ok: true };
+    }
+    room.hands[playerIndex].push(card);
+    advanceManualRefill(room);
     room.updatedAt = Date.now();
     return { ok: true };
   }
