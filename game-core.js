@@ -80,6 +80,7 @@ function createRoom(roomCode = randomCode()) {
     roundsPlayed: 0,
     selectedCards: [null, null],
     lastTrickWinner: null,
+    trickLeader: 0,
       discardCounts: [0, 0],
       drawQueue: [],
       drawChoice: null,
@@ -116,6 +117,7 @@ function startHand(room) {
   room.roundsPlayed = 0;
   room.selectedCards = [null, null];
   room.lastTrickWinner = null;
+  room.trickLeader = 0;
   room.discardCounts = [0, 0];
   room.drawQueue = [];
   room.drawChoice = null;
@@ -155,16 +157,28 @@ function getStrength(room, card) {
   return card.power;
 }
 
-function compareCards(room, card1, card2) {
-  const joker1 = card1.suit === "Gray" || card1.suit === "Color";
-  const joker2 = card2.suit === "Gray" || card2.suit === "Color";
-  if (joker1 && !joker2) return -1;
-  if (!joker1 && joker2) return 1;
-  if (joker1 && joker2) return -1;
-  const s1 = getStrength(room, card1);
-  const s2 = getStrength(room, card2);
-  if (s1 === s2) return 0;
-  return s1 > s2 ? 1 : -1;
+function isJoker(card) {
+  return card?.suit === "Gray" || card?.suit === "Color";
+}
+
+function compareCards(room, leadCard, followCard) {
+  if (isJoker(followCard)) return -1;
+  if (isJoker(leadCard)) return -1;
+
+  const leadTrump = leadCard.suit === room.trumpSuit;
+  const followTrump = followCard.suit === room.trumpSuit;
+
+  if (leadTrump && !followTrump) return 1;
+  if (!leadTrump && followTrump) return -1;
+
+  if (leadCard.suit !== followCard.suit) {
+    return 1;
+  }
+
+  const leadStrength = getStrength(room, leadCard);
+  const followStrength = getStrength(room, followCard);
+  if (leadStrength === followStrength) return 0;
+  return leadStrength > followStrength ? 1 : -1;
 }
 
 function buildHandInfo(room) {
@@ -389,34 +403,36 @@ function applyAction(room, playerIndex, action, payload = {}) {
         room.bids[room.bidWinner] = 5;
       }
       room.phase = "chooseTrump";
-    } else if (room.phase === "refillSummary") {
-      room.phase = "play";
-      room.currentPlayer = 0;
-    } else if (room.phase === "reveal") {
-      if (room.roundsPlayed >= 9) {
-        finishHand(room);
-      } else {
-        room.selectedCards = [null, null];
+      } else if (room.phase === "refillSummary") {
         room.phase = "play";
-        room.currentPlayer = 0;
-      }
-    } else if (room.phase === "handSummary") {
-      startHand(room);
+        room.currentPlayer = room.bidWinner ?? 0;
+        room.trickLeader = room.currentPlayer;
+      } else if (room.phase === "reveal") {
+        if (room.roundsPlayed >= 9) {
+          finishHand(room);
+        } else {
+          room.selectedCards = [null, null];
+          room.phase = "play";
+          room.currentPlayer = room.lastTrickWinner ?? room.trickLeader ?? 0;
+          room.trickLeader = room.currentPlayer;
+        }
+      } else if (room.phase === "handSummary") {
+        startHand(room);
     }
     room.updatedAt = Date.now();
     return { ok: true };
   }
 
-  if (action === "choose_trump" && room.phase === "chooseTrump" && room.bidWinner === playerIndex) {
+    if (action === "choose_trump" && room.phase === "chooseTrump" && room.bidWinner === playerIndex) {
     if (!TRUMP_SUITS.includes(payload.suit)) {
       return { ok: false, error: "Invalid trump suit." };
     }
-    room.trumpSuit = payload.suit;
-    room.phase = "discard";
+      room.trumpSuit = payload.suit;
+      room.phase = "discard";
     room.currentPlayer = 0;
-    room.updatedAt = Date.now();
-    return { ok: true };
-  }
+      room.updatedAt = Date.now();
+      return { ok: true };
+    }
 
   if (action === "choose_hand_card" && ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex) {
     const hand = room.hands[playerIndex];
@@ -460,16 +476,33 @@ function applyAction(room, playerIndex, action, payload = {}) {
     if (index === -1) {
       return { ok: false, error: "Card not found in your hand." };
     }
-    const [card] = hand.splice(index, 1);
+
+    const card = hand[index];
+
+    if (room.phase === "play" && room.selectedCards.some(Boolean)) {
+      const leadPlayer = room.trickLeader;
+      const leadCard = room.selectedCards[leadPlayer];
+      if (leadCard && !isJoker(card) && !isJoker(leadCard) && card.suit !== leadCard.suit) {
+        const hasLedSuit = hand.some((handCard) => handCard.suit === leadCard.suit);
+        if (hasLedSuit) {
+          return { ok: false, error: `You must follow ${leadCard.suit} or play a joker.` };
+        }
+      }
+    }
+
+    hand.splice(index, 1);
 
     room.selectedCards[playerIndex] = card;
-    if (playerIndex === 0) {
-      room.currentPlayer = 1;
+    if (!room.selectedCards[0] || !room.selectedCards[1]) {
+      room.trickLeader = playerIndex;
+      room.currentPlayer = playerIndex === 0 ? 1 : 0;
     } else {
-      const result = compareCards(room, room.selectedCards[0], room.selectedCards[1]);
-      room.lastTrickWinner = result === 0 ? null : result > 0 ? 0 : 1;
-      if (result > 0) room.scores[0] += 1;
-      if (result < 0) room.scores[1] += 1;
+      const leadPlayer = room.trickLeader;
+      const followPlayer = leadPlayer === 0 ? 1 : 0;
+      const result = compareCards(room, room.selectedCards[leadPlayer], room.selectedCards[followPlayer]);
+      room.lastTrickWinner = result === 0 ? null : result > 0 ? leadPlayer : followPlayer;
+      if (room.lastTrickWinner === 0) room.scores[0] += 1;
+      if (room.lastTrickWinner === 1) room.scores[1] += 1;
       room.roundsPlayed += 1;
       room.phase = "reveal";
     }
