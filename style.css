@@ -550,6 +550,69 @@ button:disabled {
   color: #1c2430;
 }
 
+.card-svg-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.card-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.svg-corner-rank {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-corner-suit {
+  font-size: 15px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-pip {
+  font-size: 22px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-face-rank {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-face-suit {
+  font-size: 24px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-joker-side {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  writing-mode: tb;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-joker-side.right {
+  transform: rotate(180deg);
+    transform-origin: center;
+}
+
+.svg-joker-mark {
+  font-size: 28px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.svg-joker-name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
 .played-card.empty {
   color: transparent;
   background: transparent;

@@ -65,6 +65,14 @@ const suitGlyphs = {
   Gray: "&#10022;",
   Color: "&#10022;",
 };
+const suitChars = {
+  Heart: "♥",
+  Diamond: "♦",
+  Spade: "♠",
+  Clover: "♣",
+  Gray: "✶",
+  Color: "✦",
+};
 const pipLayouts = {
   A: ["cc"],
   6: ["tl", "tr", "ml", "mr", "bl", "br"],
@@ -80,6 +88,77 @@ function setBanner(text) {
 
 function suitGlyph(suit) {
   return suitGlyphs[suit] || "?";
+}
+
+function suitChar(suit) {
+  return suitChars[suit] || "?";
+}
+
+function svgText(x, y, text, extra = "") {
+  return `<text x="${x}" y="${y}" ${extra}>${text}</text>`;
+}
+
+function svgPip(x, y, symbol, rotate = false) {
+  if (!rotate) {
+    return svgText(x, y, symbol, 'text-anchor="middle" dominant-baseline="middle" class="svg-pip"');
+  }
+  return `<g transform="translate(${x} ${y}) rotate(180)">${svgText(0, 0, symbol, 'text-anchor="middle" dominant-baseline="middle" class="svg-pip"')}</g>`;
+}
+
+function svgCardMarkup(card) {
+  if (!card) return "";
+  const red = card.suit === "Heart" || card.suit === "Diamond";
+  const color = red ? "#b32025" : "#1f2937";
+  const symbol = suitChar(card.suit);
+  const pipCoords = {
+    tl: [38, 40],
+    tr: [102, 40],
+    tc: [70, 40],
+    ml: [38, 76],
+    mr: [102, 76],
+    cc: [70, 95],
+    ict: [70, 66],
+    icb: [70, 124],
+    bl: [38, 150],
+    br: [102, 150],
+    bc: [70, 150],
+  };
+  const positions = pipLayouts[card.rank] || ["cc"];
+  const pipNodes = positions.map((position) => {
+    const [x, y] = pipCoords[position];
+    const rotate = position.startsWith("b") || position === "icb";
+    return svgPip(x, y, symbol, rotate);
+  }).join("");
+
+  const center = card.rank === "Joker"
+    ? `
+      ${svgText(18, 96, "JOKER", `fill="${color}" class="svg-joker-side"`)}
+      ${svgText(122, 96, "JOKER", `fill="${color}" class="svg-joker-side right"`)}
+      ${svgText(70, 82, symbol, `fill="${color}" text-anchor="middle" dominant-baseline="middle" class="svg-joker-mark"`)}
+      ${svgText(70, 112, card.suit === "Color" ? "COLOR" : "GRAY", `fill="${color}" text-anchor="middle" class="svg-joker-name"`)}
+    `
+    : ["J", "Q", "K"].includes(card.rank)
+      ? `
+        ${svgText(70, 84, card.rank, `fill="${color}" text-anchor="middle" class="svg-face-rank"`)}
+        ${svgText(70, 116, symbol, `fill="${color}" text-anchor="middle" class="svg-face-suit"`)}
+      `
+      : pipNodes;
+
+  return `
+    <div class="card-svg-wrap">
+      <svg class="card-svg" viewBox="0 0 140 190" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="137" height="187" rx="14" fill="#fffdf9" stroke="rgba(0,0,0,0.14)" stroke-width="1.5" />
+        <rect x="6" y="6" width="128" height="178" rx="11" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1" />
+        ${svgText(14, 22, card.rank, `fill="${color}" class="svg-corner-rank"`)}
+        ${svgText(14, 37, symbol, `fill="${color}" class="svg-corner-suit"`)}
+        <g transform="translate(126 168) rotate(180)">
+          ${svgText(0, 0, card.rank, `fill="${color}" class="svg-corner-rank" text-anchor="end"`)}
+          ${svgText(0, 15, symbol, `fill="${color}" class="svg-corner-suit" text-anchor="end"`)}
+        </g>
+        ${center}
+      </svg>
+    </div>
+  `;
 }
 
 function pipMarkup(rank, suit) {
@@ -312,27 +391,7 @@ function cardMarkup(card) {
 }
 
 function deckStyleCardMarkup(card) {
-  if (!card) return "?";
-  const isRed = card.suit === "Heart" || card.suit === "Diamond";
-  const colorClass = isRed ? "red" : "black";
-  const center = card.rank === "Joker"
-    ? jokerMarkup(card)
-    : ["J", "Q", "K"].includes(card.rank)
-      ? faceCardMarkup(card)
-      : pipMarkup(card.rank, card.suit);
-  return `
-    <div class="card-face ${colorClass}">
-      <div class="card-corner top">
-        <div class="corner-rank">${card.rank}</div>
-        <div class="corner-suit">${suitGlyph(card.suit)}</div>
-      </div>
-      ${center}
-      <div class="card-corner bottom">
-        <div class="corner-rank">${card.rank}</div>
-        <div class="corner-suit">${suitGlyph(card.suit)}</div>
-      </div>
-    </div>
-  `;
+  return svgCardMarkup(card);
 }
 
 function renderPlayed(el, card) {
