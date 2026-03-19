@@ -364,6 +364,12 @@ $("quickMatchButton").addEventListener("click", () => {
   send("quick_match", { name: state.guestName });
 });
 
+$("playBotButton").addEventListener("click", () => {
+  state.loading = true;
+  render();
+  send("play_bot", { name: state.guestName });
+});
+
 $("createRoomButton").addEventListener("click", () => {
   state.loading = true;
   render();
