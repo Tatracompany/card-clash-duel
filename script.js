@@ -422,7 +422,7 @@ function renderHand(room) {
     if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
       button.classList.add("muted");
     }
-    button.innerHTML = compactHandCardMarkup(card);
+    button.innerHTML = deckStyleCardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) return;
       if (room.phase === "discard") {
