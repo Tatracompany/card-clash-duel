@@ -565,8 +565,8 @@ button:disabled {
   min-height: 198px;
   overflow: hidden;
   overflow-y: visible;
-  --card-width: 124px;
-  --card-overlap: 34px;
+  --card-width: 108px;
+  --card-overlap: 38px;
 }
 
 .hand-card {
@@ -574,14 +574,14 @@ button:disabled {
   -webkit-appearance: none;
   background: var(--card-front);
   border: 1px solid rgba(28, 36, 48, 0.16);
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 0;
   width: var(--card-width);
   min-width: var(--card-width);
   min-height: calc(var(--card-width) * 1.42);
   display: block;
   color: #203040;
-  box-shadow: 0 10px 18px rgba(20, 35, 51, 0.14);
+  box-shadow: 0 8px 14px rgba(20, 35, 51, 0.14);
   overflow: hidden;
   margin-left: calc(var(--card-overlap) * -1);
   transform: translateY(var(--lift, 0px)) rotate(var(--rotation, 0deg));
