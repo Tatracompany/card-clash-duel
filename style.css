@@ -424,6 +424,12 @@ button:disabled {
   padding: 0;
 }
 
+.draw-panel .played-card {
+  width: min(144px, 100%);
+  min-height: 202px;
+  margin: 0 auto 16px;
+}
+
 .played-card.revealed {
   border-style: solid;
   background: linear-gradient(180deg, #fffefb, #f7ead7);
@@ -673,6 +679,11 @@ button:disabled {
 
   .played-card {
     min-height: 144px;
+  }
+
+  .draw-panel .played-card {
+    width: min(132px, 100%);
+    min-height: 186px;
   }
 
   .card-rank {
