@@ -86,7 +86,7 @@ function pipMarkup(rank, suit) {
   const positions = pipLayouts[rank] || ["cc"];
   return `
     <div class="pip-layout pip-count-${positions.length}">
-      ${positions.map((position) => `<span class="pip pip-${position}">${suitGlyph(suit)}</span>`).join("")}
+      ${positions.map((position) => `<span class="pip pip-${position}${position.startsWith("b") || position === "icb" ? " pip-invert" : ""}">${suitGlyph(suit)}</span>`).join("")}
     </div>
   `;
 }
@@ -94,8 +94,11 @@ function pipMarkup(rank, suit) {
 function faceCardMarkup(card) {
   return `
     <div class="face-layout">
-      <div class="face-center-rank">${card.rank}</div>
-      <div class="face-center-suit">${suitGlyph(card.suit)}</div>
+      <div class="face-center-badge">
+        <div class="face-center-suit top">${suitGlyph(card.suit)}</div>
+        <div class="face-center-rank">${card.rank}</div>
+        <div class="face-center-suit bottom">${suitGlyph(card.suit)}</div>
+      </div>
     </div>
   `;
 }
@@ -105,7 +108,7 @@ function jokerMarkup(card) {
     <div class="joker-layout ${card.suit === "Color" ? "color-joker" : "gray-joker"}">
       <div class="joker-side">JOKER</div>
       <div class="joker-center-mark">
-        <div class="joker-icon">${card.suit === "Color" ? "&#10022;" : "&#9822;"}</div>
+        <div class="joker-icon">${card.suit === "Color" ? "&#10022;" : "&#10023;"}</div>
         <div class="joker-name">${card.suit === "Color" ? "COLOR" : "GRAY"}</div>
       </div>
       <div class="joker-side mirrored">JOKER</div>

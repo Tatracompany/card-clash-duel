@@ -567,6 +567,15 @@ button:disabled {
   border-radius: inherit;
 }
 
+.card-face::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
 .card-face.red {
   color: #b32025;
 }
@@ -621,6 +630,10 @@ button:disabled {
   line-height: 1;
 }
 
+.pip-invert {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
 .pip-tl { top: 16%; left: 28%; transform: translate(-50%, -50%); }
 .pip-tr { top: 16%; left: 72%; transform: translate(-50%, -50%); }
 .pip-tc { top: 16%; left: 50%; transform: translate(-50%, -50%); }
@@ -636,32 +649,40 @@ button:disabled {
 .face-layout {
   display: grid;
   place-items: center;
-  gap: 0.12em;
-  padding-top: 0.15em;
+  padding: 0 14%;
+}
+
+.face-center-badge {
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.06em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .face-center-rank {
-  font-size: 2.05em;
+  font-size: 1.65em;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   line-height: 1;
 }
 
 .face-center-suit {
-  font-size: 1.55em;
+  font-size: 1.02em;
   line-height: 1;
 }
 
-.center-rank {
-  font-size: 2.35rem;
-  font-weight: 700;
-  line-height: 1;
+.face-center-suit.top {
+  margin-bottom: 0.05em;
 }
 
-.center-suit {
-  font-size: 1.7rem;
-  line-height: 1;
-  margin-top: 4px;
+.face-center-suit.bottom {
+  transform: rotate(180deg);
+  margin-top: 0.02em;
 }
 
 .joker-word {
@@ -703,35 +724,18 @@ button:disabled {
 .joker-center-mark {
   display: grid;
   justify-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .joker-icon {
-  font-size: 1.55em;
+  font-size: 1.35em;
   line-height: 1;
 }
 
 .joker-name {
-  font-size: 0.62em;
+  font-size: 0.52em;
   font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.joker-title {
-  font-size: 1rem;
-  letter-spacing: 0.18em;
-  font-weight: 800;
-}
-
-.joker-glyph {
-  font-size: 2.4rem;
-  line-height: 1;
-}
-
-.joker-subtitle {
-  font-size: 0.9rem;
-  letter-spacing: 0.2em;
-  font-weight: 700;
+  letter-spacing: 0.14em;
 }
 
 .hand-header {
@@ -779,10 +783,6 @@ button:disabled {
   transform-origin: center bottom;
 }
 
-.hand-card .card-face {
-  background: #fffefb;
-}
-
 .hand-card .card-corner.top {
   top: 4px;
   left: 4px;
@@ -806,16 +806,15 @@ button:disabled {
 }
 
 .hand-card .face-layout {
-  gap: 0.04em;
-  padding-top: 0;
+  padding: 0 12%;
+}
+
+.hand-card .face-center-badge {
+  aspect-ratio: 1 / 1.05;
 }
 
 .hand-card .face-center-rank {
   font-size: 1.18em;
-}
-
-.hand-card .face-center-suit {
-  font-size: 0.92em;
 }
 
 .hand-card .joker-layout {
@@ -865,6 +864,7 @@ button:disabled {
 .hand-card.muted .card-face,
 .hand-card.muted .card-corner,
 .hand-card.muted .pip,
+.hand-card.muted .face-center-badge,
 .hand-card.muted .face-center-rank,
 .hand-card.muted .face-center-suit,
 .hand-card.muted .joker-side,
