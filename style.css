@@ -71,9 +71,9 @@ body {
 
 .table-board {
   background:
-    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.09), transparent 28%),
-    linear-gradient(180deg, #234f59, #163740);
-  color: #eef4f3;
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.06), transparent 26%),
+    linear-gradient(180deg, #1d4a53, #102c33);
+  color: #f2f6f5;
   overflow: hidden;
 }
 
@@ -89,7 +89,7 @@ body {
 
 .zone-role {
   margin: 0 0 6px;
-  color: rgba(238, 244, 243, 0.68);
+  color: rgba(233, 241, 239, 0.88);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -97,7 +97,7 @@ body {
 
 .zone-hint,
 .player-zone #handHint {
-  color: rgba(238, 244, 243, 0.78);
+  color: rgba(228, 238, 236, 0.92);
 }
 
 .opponent-zone h2,
@@ -105,7 +105,7 @@ body {
 .table-callout h2,
 .reveal-slot h3,
 .compact h2 {
-  color: #f7fbfb;
+  color: #ffffff;
 }
 
 .opponent-hand {
@@ -178,13 +178,13 @@ body {
 .score-card.compact {
   min-width: 150px;
   padding: 16px 18px;
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(10, 24, 28, 0.34);
+  border-color: rgba(255, 255, 255, 0.14);
   box-shadow: none;
 }
 
 .score-card.compact .score {
-  color: #fff7de;
+  color: #ffe7a6;
 }
 
 .table-callout {
@@ -194,7 +194,7 @@ body {
 }
 
 .table-callout p {
-  color: rgba(238, 244, 243, 0.86);
+  color: rgba(238, 244, 243, 0.96);
 }
 
 .trick-arena {
@@ -217,10 +217,10 @@ body {
   height: 82px;
   border-radius: 24px;
   background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.46), transparent 35%),
-    linear-gradient(135deg, rgba(255, 214, 118, 0.72), rgba(219, 97, 54, 0.72));
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.28), transparent 35%),
+    linear-gradient(135deg, rgba(255, 196, 87, 0.9), rgba(212, 86, 42, 0.92));
   filter: blur(0.5px);
-  box-shadow: 0 0 40px rgba(255, 202, 112, 0.25);
+  box-shadow: 0 0 22px rgba(255, 184, 84, 0.2);
 }
 
 .arena-label {
@@ -230,7 +230,8 @@ body {
   font-size: 0.8rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(238, 244, 243, 0.72);
+  color: rgba(248, 248, 245, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .hero,
@@ -390,8 +391,8 @@ button:disabled {
   display: grid;
   place-items: center;
   border-radius: 18px;
-  border: 2px dashed rgba(31, 92, 116, 0.25);
-  background: rgba(255, 250, 244, 0.65);
+  border: 2px dashed rgba(137, 193, 214, 0.48);
+  background: rgba(247, 251, 252, 0.9);
   font-size: 2rem;
   font-weight: 700;
 }
@@ -404,8 +405,8 @@ button:disabled {
 }
 
 .played-card.empty {
-  color: var(--muted);
-  background: rgba(214, 222, 228, 0.42);
+  color: #47606e;
+  background: rgba(231, 240, 244, 0.9);
 }
 
 .card-face {
@@ -448,7 +449,7 @@ button:disabled {
 
 .hand-card {
   background: var(--card-front);
-  border: 1px solid rgba(28, 36, 48, 0.1);
+  border: 1px solid rgba(28, 36, 48, 0.16);
   border-radius: 18px;
   padding: 16px 12px;
   min-height: 152px;
@@ -456,7 +457,8 @@ button:disabled {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 10px 18px rgba(20, 35, 51, 0.08);
+  color: #203040;
+  box-shadow: 0 10px 18px rgba(20, 35, 51, 0.14);
 }
 
 .hand-card.selected {
@@ -475,7 +477,7 @@ button:disabled {
 
 .hand-card .power {
   font-size: 0.95rem;
-  color: var(--muted);
+  color: #62707d;
 }
 
 .rules ul {
