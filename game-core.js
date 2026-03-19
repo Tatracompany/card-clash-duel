@@ -262,18 +262,17 @@ function buildRoomView(room, playerIndex) {
     playedCards: room.selectedCards.map(publicCard),
     allowedBids: BID_VALUES.filter((bid) => bid > highBid),
     suitPrompt: "Choose the strongest suit.",
-    drawChoice: room.phase === "draw" && room.currentPlayer === playerIndex && room.drawChoice
+    drawChoice: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
       ? { firstCard: publicCard(room.drawChoice.firstCard) }
       : null,
-    drawPrompt: room.phase === "draw" && room.currentPlayer === playerIndex && room.drawChoice
-      ? `First card: ${cardLabel(room.drawChoice.firstCard)}`
+    drawPrompt: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
+      ? `${room.phase === "refill" ? "Refill card" : "First card"}: ${cardLabel(room.drawChoice.firstCard)}`
       : "",
     actions: {
       canBid: room.phase === "bid" && room.currentPlayer === playerIndex,
       canChooseTrump: room.phase === "chooseTrump" && room.bidWinner === playerIndex,
       canChooseHandCard: ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex,
-      canDrawOne: room.phase === "refill" && room.currentPlayer === playerIndex,
-      canChooseDraw: room.phase === "draw" && room.currentPlayer === playerIndex,
+      canChooseDraw: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex,
       canContinue: ["bidReveal", "refillSummary", "reveal", "handSummary"].includes(room.phase),
     },
   };
@@ -294,21 +293,25 @@ function finishHand(room) {
 function startManualRefill(room) {
   room.phase = "refill";
   room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
+  startDrawTurn(room);
 }
 
 function advanceManualRefill(room) {
   const bothFull = room.hands[0].length >= 9 && room.hands[1].length >= 9;
   if (bothFull || room.deck.length === 0) {
     room.phase = "refillSummary";
+    room.drawChoice = null;
     return;
   }
 
   if (room.hands[0].length < 9 && room.hands[1].length < 9) {
     room.currentPlayer = room.currentPlayer === 0 ? 1 : 0;
+    startDrawTurn(room);
     return;
   }
 
   room.currentPlayer = room.hands[0].length < 9 ? 0 : 1;
+  startDrawTurn(room);
 }
 
 function applyAction(room, playerIndex, action, payload = {}) {
@@ -428,7 +431,7 @@ function applyAction(room, playerIndex, action, payload = {}) {
     return { ok: true };
   }
 
-  if (["draw_keep_first", "draw_reject_first"].includes(action) && room.phase === "draw" && room.currentPlayer === playerIndex) {
+  if (["draw_keep_first", "draw_reject_first"].includes(action) && ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex) {
     if (action === "draw_keep_first") {
       room.hands[playerIndex].push(room.drawChoice.firstCard);
       if (room.drawChoice.secondCard) room.discardPile.push(room.drawChoice.secondCard);
@@ -436,26 +439,16 @@ function applyAction(room, playerIndex, action, payload = {}) {
       room.discardPile.push(room.drawChoice.firstCard);
       if (room.drawChoice.secondCard) room.hands[playerIndex].push(room.drawChoice.secondCard);
     }
-    if (playerIndex === room.drawQueue[0]) {
+    if (room.phase === "draw" && playerIndex === room.drawQueue[0]) {
       room.currentPlayer = room.drawQueue[1];
       startDrawTurn(room);
-    } else {
+    } else if (room.phase === "draw") {
       room.drawChoice = null;
       startManualRefill(room);
+    } else {
+      room.drawChoice = null;
+      advanceManualRefill(room);
     }
-    room.updatedAt = Date.now();
-    return { ok: true };
-  }
-
-  if (action === "draw_one_card" && room.phase === "refill" && room.currentPlayer === playerIndex) {
-    const card = draw(room);
-    if (!card) {
-      room.phase = "refillSummary";
-      room.updatedAt = Date.now();
-      return { ok: true };
-    }
-    room.hands[playerIndex].push(card);
-    advanceManualRefill(room);
     room.updatedAt = Date.now();
     return { ok: true };
   }

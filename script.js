@@ -32,7 +32,6 @@ const els = {
   continue: $("continueButton"),
   copyInvite: $("copyInviteButton"),
   confirmCard: $("confirmCardButton"),
-  drawOne: $("drawOneButton"),
   bidPanel: $("bidPanel"),
   suitPanel: $("suitPickerPanel"),
   suitText: $("suitPickerText"),
@@ -240,8 +239,6 @@ function renderRoom(room) {
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
   els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
   els.confirmCard.textContent = getConfirmCardLabel(room);
-  els.drawOne.hidden = !room.actions.canDrawOne;
-  els.drawOne.disabled = !room.actions.canDrawOne || state.loading;
 
   if (room.actions.canBid) {
     els.bidPanel.hidden = false;
@@ -316,12 +313,6 @@ els.confirmCard.addEventListener("click", () => {
   state.loading = true;
   render();
   send("action", { action: "choose_hand_card", payload: { cardId: state.selectedCardId } });
-});
-
-els.drawOne.addEventListener("click", () => {
-  state.loading = true;
-  render();
-  send("action", { action: "draw_one_card" });
 });
 
 els.keepFirst.addEventListener("click", () => {
