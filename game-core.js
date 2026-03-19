@@ -264,6 +264,14 @@ function buildPhaseTitle(room, playerIndex) {
 
 function buildRoomView(room, playerIndex) {
   const highBid = Math.max(...room.bids.filter((v) => v !== null), 4);
+  const leadPlayer = room.trickLeader;
+  const leadCard = room.phase === "play" && room.selectedCards.some(Boolean) ? room.selectedCards[leadPlayer] : null;
+  const followSuit = leadCard
+    && room.currentPlayer === playerIndex
+    && !isJoker(leadCard)
+    && room.hands[playerIndex].some((card) => card.suit === leadCard.suit)
+    ? leadCard.suit
+    : null;
   return {
     phase: room.phase,
     roomCode: room.roomCode,
@@ -279,7 +287,8 @@ function buildRoomView(room, playerIndex) {
     handHint: buildHandHint(room, playerIndex),
     yourHand: room.hands[playerIndex].map(publicCard),
     playedCards: room.selectedCards.map(publicCard),
-      allowedBids: BID_VALUES.filter((bid) => bid > highBid),
+    followSuit,
+        allowedBids: BID_VALUES.filter((bid) => bid > highBid),
       suitPrompt: "Choose the strongest suit.",
       drawChoice: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
         ? { firstCard: publicCard(room.drawChoice.firstCard) }

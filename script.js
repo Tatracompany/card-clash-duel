@@ -246,6 +246,9 @@ function renderHand(room) {
     if (state.selectedCardIds.includes(card.id)) {
       button.classList.add("selected");
     }
+    if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
+      button.classList.add("muted");
+    }
     button.innerHTML = cardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) return;

@@ -609,6 +609,17 @@ button:disabled {
   z-index: 3;
 }
 
+.hand-card.muted .card-face {
+  background: #e2ddd2;
+  color: #697164;
+}
+
+.hand-card.muted .card-corner,
+.hand-card.muted .center-rank,
+.hand-card.muted .center-suit {
+  opacity: 0.68;
+}
+
 .rules ul {
   margin-bottom: 0;
   padding-left: 20px;
