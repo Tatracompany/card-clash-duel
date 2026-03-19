@@ -2,7 +2,7 @@ const state = {
   socket: null,
   room: null,
   loading: false,
-  selectedCardId: null,
+  selectedCardIds: [],
   guestName: loadGuestName(),
 };
 
@@ -99,8 +99,10 @@ function connect() {
     if (message.type === "room_state") {
       state.room = message.room;
       state.loading = false;
-      if (!state.room.yourHand.some((card) => card.id === state.selectedCardId)) {
-        state.selectedCardId = null;
+      const handIds = new Set(state.room.yourHand.map((card) => card.id));
+      state.selectedCardIds = state.selectedCardIds.filter((cardId) => handIds.has(cardId));
+      if (state.room.phase !== "discard" && state.selectedCardIds.length > 1) {
+        state.selectedCardIds = state.selectedCardIds.slice(0, 1);
       }
       render();
     }
@@ -151,7 +153,11 @@ function hideActionPanels() {
 }
 
 function getConfirmCardLabel(room) {
-  if (room.phase === "discard") return "Discard Selected Card";
+  if (room.phase === "discard") {
+    return state.selectedCardIds.length === 3
+      ? "Discard 3 Selected Cards"
+      : `Select 3 Cards (${state.selectedCardIds.length}/3)`;
+  }
   if (room.phase === "play") return "Play Selected Card";
   return "Confirm Card";
 }
@@ -160,11 +166,15 @@ function renderOpponentHand(room) {
   els.opponentHand.innerHTML = "";
   const total = room.opponentHandCount || 0;
   const displayCount = Math.min(total, 8);
+  const midpoint = Math.max(displayCount - 1, 0) / 2;
 
   for (let index = 0; index < displayCount; index += 1) {
     const back = document.createElement("div");
     back.className = "card-back";
-    back.style.setProperty("--offset", `${index}`);
+    const offset = index - midpoint;
+    back.style.setProperty("--offset", `${offset}`);
+    back.style.setProperty("--lift", `${Math.abs(offset) * 2}px`);
+    back.style.setProperty("--rotation", `${offset * 6}deg`);
     els.opponentHand.appendChild(back);
   }
 
@@ -183,19 +193,34 @@ function renderHand(room) {
     if (suitDiff !== 0) return suitDiff;
     return (rankOrder[left.rank] ?? 99) - (rankOrder[right.rank] ?? 99);
   });
+  const midpoint = Math.max(sortedHand.length - 1, 0) / 2;
 
-  sortedHand.forEach((card) => {
+  sortedHand.forEach((card, index) => {
     const button = document.createElement("button");
     button.className = "hand-card";
     button.type = "button";
     button.disabled = !room.actions.canChooseHandCard || state.loading;
-    if (state.selectedCardId === card.id) {
+    const offset = index - midpoint;
+    button.style.setProperty("--offset", `${offset}`);
+    button.style.setProperty("--lift", `${Math.abs(offset) * 5}px`);
+    button.style.setProperty("--rotation", `${offset * 4.5}deg`);
+    if (state.selectedCardIds.includes(card.id)) {
       button.classList.add("selected");
     }
     button.innerHTML = cardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) return;
-      state.selectedCardId = card.id;
+      if (room.phase === "discard") {
+        if (state.selectedCardIds.includes(card.id)) {
+          state.selectedCardIds = state.selectedCardIds.filter((id) => id !== card.id);
+        } else if (state.selectedCardIds.length < 3) {
+          state.selectedCardIds = [...state.selectedCardIds, card.id];
+        } else {
+          state.selectedCardIds = [...state.selectedCardIds.slice(1), card.id];
+        }
+      } else {
+        state.selectedCardIds = [card.id];
+      }
       render();
     });
     els.hand.appendChild(button);
@@ -237,7 +262,9 @@ function renderRoom(room) {
   els.copyInvite.hidden = !room.roomCode;
   els.copyInvite.disabled = state.loading || !room.roomCode;
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
-  els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
+  els.confirmCard.disabled = !room.actions.canChooseHandCard
+    || state.loading
+    || (room.phase === "discard" ? state.selectedCardIds.length !== 3 : state.selectedCardIds.length !== 1);
   els.confirmCard.textContent = getConfirmCardLabel(room);
 
   if (room.actions.canBid) {
@@ -309,10 +336,17 @@ els.copyInvite.addEventListener("click", async () => {
 });
 
 els.confirmCard.addEventListener("click", () => {
-  if (!state.selectedCardId) return;
+  if (!state.room) return;
+  if (state.room.phase === "discard" && state.selectedCardIds.length !== 3) return;
+  if (state.room.phase !== "discard" && state.selectedCardIds.length !== 1) return;
   state.loading = true;
   render();
-  send("action", { action: "choose_hand_card", payload: { cardId: state.selectedCardId } });
+  send("action", {
+    action: "choose_hand_card",
+    payload: state.room.phase === "discard"
+      ? { cardIds: state.selectedCardIds }
+      : { cardId: state.selectedCardIds[0] },
+  });
 });
 
 els.keepFirst.addEventListener("click", () => {

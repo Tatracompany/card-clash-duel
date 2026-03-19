@@ -191,7 +191,7 @@ function buildPhaseTitle(room, playerIndex) {
   }
 }
 
-function buildStatusText(room, playerIndex) {
+  function buildStatusText(room, playerIndex) {
   if (room.players.length < 2) return `Room ${room.roomCode} is waiting for a second player.`;
   const ownTurn = room.currentPlayer === playerIndex;
   switch (room.phase) {
@@ -205,14 +205,14 @@ function buildStatusText(room, playerIndex) {
       return room.passedBid[0] && room.passedBid[1]
         ? "Both players passed. A random player will be forced to bid 5."
         : `Player ${room.bidWinner + 1} wins the bid with ${room.bids[room.bidWinner]}.`;
-    case "chooseTrump":
-      return room.bidWinner === playerIndex ? "Pick the strongest suit." : "Waiting for trump choice.";
-    case "discard":
-      return ownTurn ? `Discard ${3 - room.discardCounts[playerIndex]} more card(s).` : "Waiting for the other player to discard.";
+      case "chooseTrump":
+        return room.bidWinner === playerIndex ? "Pick the strongest suit." : "Waiting for trump choice.";
+      case "discard":
+        return ownTurn ? "Pick exactly 3 cards, then confirm the full discard." : "Waiting for the other player to discard.";
     case "draw":
       return ownTurn ? "Keep the first card or reject it and take the second." : "Waiting for the other player's draw choice.";
-    case "refill":
-      return ownTurn ? "Draw one card from the deck." : "Waiting for the other player to draw.";
+      case "refill":
+        return ownTurn ? "Look at the shown refill card, then keep it or reject it." : "Waiting for the other player's refill choice.";
     case "refillSummary":
       return "Both players reached 9 cards. The hand is ready.";
     case "play":
@@ -234,10 +234,11 @@ function buildStatusText(room, playerIndex) {
   }
 }
 
-function buildHandHint(room, playerIndex) {
-  if (room.players.length < 2) return "Share the room code or send the Netlify URL to your friend.";
-  if (room.phase === "discard" || room.phase === "play") return `${room.hands[playerIndex].length} card(s) in your hand.`;
-  if (room.phase === "refill") return `${room.hands[playerIndex].length} of 9 cards ready.`;
+  function buildHandHint(room, playerIndex) {
+    if (room.players.length < 2) return "Share the room code or send the Netlify URL to your friend.";
+    if (room.phase === "discard") return "Choose 3 cards together, then submit them in one move.";
+    if (room.phase === "play") return `${room.hands[playerIndex].length} card(s) in your hand.`;
+    if (room.phase === "refill") return `${room.hands[playerIndex].length} of 9 cards ready. Each refill card is shown before you decide.`;
   if (room.phase === "draw") return "If you keep the first card, the second is discarded unseen.";
   if (room.phase === "handSummary") return "Continue to deal the next hand unless someone reached 21.";
   return "Only your own hand is visible on this phone.";
@@ -395,19 +396,34 @@ function applyAction(room, playerIndex, action, payload = {}) {
 
   if (action === "choose_hand_card" && ["discard", "play"].includes(room.phase) && room.currentPlayer === playerIndex) {
     const hand = room.hands[playerIndex];
-    const index = hand.findIndex((card) => card.id === payload.cardId);
-    if (index === -1) {
-      return { ok: false, error: "Card not found in your hand." };
-    }
-    const [card] = hand.splice(index, 1);
 
     if (room.phase === "discard") {
-      room.discardPile.push(card);
-      room.discardCounts[playerIndex] += 1;
-      if (playerIndex === 0 && room.discardCounts[0] === 3) {
-        room.currentPlayer = 1;
+      const cardIds = Array.isArray(payload.cardIds) ? payload.cardIds : [];
+      if (cardIds.length !== 3) {
+        return { ok: false, error: "Choose exactly 3 cards to discard." };
       }
-      if (playerIndex === 1 && room.discardCounts[1] === 3) {
+
+      const uniqueCardIds = [...new Set(cardIds)];
+      if (uniqueCardIds.length !== 3) {
+        return { ok: false, error: "Choose 3 different cards to discard." };
+      }
+
+      const discardCards = uniqueCardIds.map((cardId) => {
+        const index = hand.findIndex((card) => card.id === cardId);
+        return index === -1 ? null : hand[index];
+      });
+
+      if (discardCards.some((card) => !card)) {
+        return { ok: false, error: "One of the chosen cards is not in your hand." };
+      }
+
+      room.hands[playerIndex] = hand.filter((card) => !uniqueCardIds.includes(card.id));
+      room.discardPile.push(...discardCards);
+      room.discardCounts[playerIndex] = 3;
+
+      if (playerIndex === 0) {
+        room.currentPlayer = 1;
+      } else {
         room.drawQueue = [room.bidWinner, room.bidWinner === 0 ? 1 : 0];
         room.currentPlayer = room.drawQueue[0];
         startDrawTurn(room);
@@ -415,6 +431,12 @@ function applyAction(room, playerIndex, action, payload = {}) {
       room.updatedAt = Date.now();
       return { ok: true };
     }
+
+    const index = hand.findIndex((card) => card.id === payload.cardId);
+    if (index === -1) {
+      return { ok: false, error: "Card not found in your hand." };
+    }
+    const [card] = hand.splice(index, 1);
 
     room.selectedCards[playerIndex] = card;
     if (playerIndex === 0) {

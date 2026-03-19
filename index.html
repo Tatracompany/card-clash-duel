@@ -80,18 +80,13 @@
             </section>
 
             <section class="trick-arena">
-              <div class="reveal-slot">
-                <h3>You Played</h3>
-                <div id="playedCard1" class="played-card empty">?</div>
+              <div class="trick-pile" aria-label="Current trick">
+                <div class="trick-seat trick-seat-top">Opponent</div>
+                <div id="playedCard2" class="played-card trick-card trick-card-opponent empty">?</div>
+                <div id="playedCard1" class="played-card trick-card trick-card-player empty">?</div>
+                <div class="trick-seat trick-seat-bottom">You</div>
               </div>
-              <div class="arena-stack">
-                <div class="stack-glow"></div>
-                <p class="arena-label">Current Trick</p>
-              </div>
-              <div class="reveal-slot">
-                <h3>Opponent Played</h3>
-                <div id="playedCard2" class="played-card empty">?</div>
-              </div>
+              <p class="arena-label">Current Trick</p>
             </section>
           </div>
 
@@ -103,7 +98,7 @@
               </div>
               <p id="handHint">Only your cards are visible on this computer.</p>
             </div>
-            <div id="handContainer" class="hand hand-dock" role="list"></div>
+            <div id="handContainer" class="hand hand-fan" role="list"></div>
           </div>
         </section>
       </section>
