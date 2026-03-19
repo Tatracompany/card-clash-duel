@@ -419,8 +419,16 @@ function renderHand(room) {
     button.style.setProperty("--lift", `${Math.abs(offset) * 5}px`);
     button.style.setProperty("--rotation", `${offset * 4.5}deg`);
     button.style.zIndex = String(100 + index);
-    if (state.selectedCardIds.includes(card.id)) {
-      button.classList.add(room.phase === "discard" ? "discard-selected" : "selected");
+    const discardSelectionIndex = state.selectedCardIds.indexOf(card.id);
+    if (discardSelectionIndex !== -1) {
+      button.style.setProperty("--discard-shift", `${(discardSelectionIndex - 1) * 10}px`);
+      if (room.phase === "discard") {
+        button.classList.add("discard-selected");
+        button.style.zIndex = String(45 + discardSelectionIndex);
+      } else {
+        button.classList.add("selected");
+        button.style.zIndex = "220";
+      }
     }
     if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
       button.classList.add("muted");
