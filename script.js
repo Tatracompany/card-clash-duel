@@ -17,6 +17,9 @@ const els = {
   roomCodeInput: $("roomCodeInput"),
   roomCode: $("roomCodeLabel"),
   players: $("roomPlayers"),
+  opponentName: $("opponentName"),
+  opponentHint: $("opponentHint"),
+  opponentHand: $("opponentHand"),
   score1: $("score1"),
   score2: $("score2"),
   handInfo: $("handInfoText"),
@@ -141,6 +144,26 @@ function renderHand(room) {
   });
 }
 
+function renderOpponentHand(room) {
+  els.opponentHand.innerHTML = "";
+  const total = room.opponentHandCount || 0;
+  const displayCount = Math.min(total, 8);
+
+  for (let index = 0; index < displayCount; index += 1) {
+    const back = document.createElement("div");
+    back.className = "card-back";
+    back.style.setProperty("--offset", `${index}`);
+    els.opponentHand.appendChild(back);
+  }
+
+  if (total > 8) {
+    const counter = document.createElement("div");
+    counter.className = "card-back counter";
+    counter.textContent = `+${total - 8}`;
+    els.opponentHand.appendChild(counter);
+  }
+}
+
 function renderRoom(room) {
   els.lobby.hidden = true;
   els.game.hidden = false;
@@ -148,6 +171,8 @@ function renderRoom(room) {
 
   els.roomCode.textContent = room.roomCode ? `Room: ${room.roomCode}` : "Quick Match";
   els.players.textContent = `You: ${room.you.name} | Opponent: ${room.opponent ? room.opponent.name : "Waiting..."}`;
+  els.opponentName.textContent = room.opponent ? room.opponent.name : "Waiting...";
+  els.opponentHint.textContent = `${room.opponentHandCount || 0} card${room.opponentHandCount === 1 ? "" : "s"}`;
   els.score1.textContent = String(room.matchPoints[0]);
   els.score2.textContent = String(room.matchPoints[1]);
   els.handInfo.textContent = room.handInfo;
@@ -158,6 +183,7 @@ function renderRoom(room) {
   els.handHint.textContent = room.handHint;
   renderPlayed(els.played1, room.playedCards[0]);
   renderPlayed(els.played2, room.playedCards[1]);
+  renderOpponentHand(room);
   renderHand(room);
 
   els.continue.hidden = !room.actions.canContinue;

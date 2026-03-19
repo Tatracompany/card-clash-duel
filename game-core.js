@@ -245,6 +245,7 @@ function buildRoomView(room, playerIndex) {
     roomCode: room.roomCode,
     you: { name: room.players[playerIndex]?.name || "You" },
     opponent: room.players[playerIndex === 0 ? 1 : 0] ? { name: room.players[playerIndex === 0 ? 1 : 0].name } : null,
+    opponentHandCount: room.players[playerIndex === 0 ? 1 : 0] ? room.hands[playerIndex === 0 ? 1 : 0].length : 0,
     matchPoints: room.matchPoints,
     handInfo: buildHandInfo(room),
     trumpSuit: room.trumpSuit,

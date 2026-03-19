@@ -33,54 +33,80 @@
     </section>
 
     <section id="gamePanel" hidden>
-      <section class="scoreboard" aria-label="Scoreboard">
-        <article class="score-card">
-          <h2>Player 1 Points</h2>
-          <p id="score1" class="score">0</p>
-        </article>
-        <article class="score-card">
-          <h2>Player 2 Points</h2>
-          <p id="score2" class="score">0</p>
-        </article>
-      </section>
+      <section class="table-shell">
+        <section class="table-status panel">
+          <div class="status-chip">
+            <span class="chip-label">Room</span>
+            <span id="roomCodeLabel" class="chip-value">Room</span>
+          </div>
+          <div class="status-chip">
+            <span class="chip-label">Players</span>
+            <span id="roomPlayers" class="chip-value">Waiting...</span>
+          </div>
+          <div class="status-chip">
+            <span class="chip-label">Contract</span>
+            <span id="handInfoText" class="chip-value">Bids: P1 ? | P2 ? | Match to 21</span>
+          </div>
+          <div class="status-chip">
+            <span class="chip-label">Trump</span>
+            <span id="trumpSuitText" class="chip-value">Not chosen yet</span>
+          </div>
+        </section>
 
-      <section class="panel">
-        <p class="meta-line" id="roomCodeLabel">Room</p>
-        <p class="meta-line" id="roomPlayers">Waiting...</p>
-      </section>
+        <section class="table-board panel">
+          <div class="opponent-zone">
+            <div class="zone-header">
+              <p class="zone-role">Opponent</p>
+              <h2 id="opponentName">Waiting...</h2>
+              <p id="opponentHint" class="zone-hint">0 cards</p>
+            </div>
+            <div id="opponentHand" class="opponent-hand" aria-label="Opponent hand"></div>
+          </div>
 
-      <section class="panel">
-        <h2>Hand Info</h2>
-        <p id="handInfoText" class="trump-text">Bids: P1 ? | P2 ? | Match to 21</p>
-      </section>
+          <div class="table-middle">
+            <section class="score-ribbon" aria-label="Scoreboard">
+              <article class="score-card compact">
+                <h2>You</h2>
+                <p id="score1" class="score">0</p>
+              </article>
+              <article class="score-card compact">
+                <h2>Opponent</h2>
+                <p id="score2" class="score">0</p>
+              </article>
+            </section>
 
-      <section class="panel">
-        <h2>Strongest Suit</h2>
-        <p id="trumpSuitText" class="trump-text">Not chosen yet</p>
-      </section>
+            <section class="table-callout">
+              <h2 id="phaseTitle">Waiting</h2>
+              <p id="statusText">Waiting for the server.</p>
+            </section>
 
-      <section class="panel">
-        <h2 id="phaseTitle">Waiting</h2>
-        <p id="statusText">Waiting for the server.</p>
-      </section>
+            <section class="trick-arena">
+              <div class="reveal-slot">
+                <h3>You Played</h3>
+                <div id="playedCard1" class="played-card empty">?</div>
+              </div>
+              <div class="arena-stack">
+                <div class="stack-glow"></div>
+                <p class="arena-label">Current Trick</p>
+              </div>
+              <div class="reveal-slot">
+                <h3>Opponent Played</h3>
+                <div id="playedCard2" class="played-card empty">?</div>
+              </div>
+            </section>
+          </div>
 
-      <section class="panel reveal-panel">
-        <div class="reveal-slot">
-          <h3>Player 1 Card</h3>
-          <div id="playedCard1" class="played-card empty">?</div>
-        </div>
-        <div class="reveal-slot">
-          <h3>Player 2 Card</h3>
-          <div id="playedCard2" class="played-card empty">?</div>
-        </div>
-      </section>
-
-      <section class="panel hand-panel">
-        <div class="hand-header">
-          <h2 id="handTitle">Your Hand</h2>
-          <p id="handHint">Only your cards are visible on this computer.</p>
-        </div>
-        <div id="handContainer" class="hand" role="list"></div>
+          <div class="player-zone">
+            <div class="hand-header">
+              <div>
+                <p class="zone-role">You</p>
+                <h2 id="handTitle">Your Hand</h2>
+              </div>
+              <p id="handHint">Only your cards are visible on this computer.</p>
+            </div>
+            <div id="handContainer" class="hand hand-dock" role="list"></div>
+          </div>
+        </section>
       </section>
 
       <section class="panel controls-panel" id="actionPanel">

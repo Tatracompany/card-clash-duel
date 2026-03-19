@@ -34,6 +34,205 @@ body {
   padding: 28px 0 40px;
 }
 
+.table-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.table-status {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(250, 245, 235, 0.9));
+}
+
+.status-chip {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(57, 84, 104, 0.1);
+}
+
+.chip-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.chip-value {
+  display: block;
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.table-board {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.09), transparent 28%),
+    linear-gradient(180deg, #234f59, #163740);
+  color: #eef4f3;
+  overflow: hidden;
+}
+
+.opponent-zone,
+.player-zone {
+  position: relative;
+}
+
+.zone-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.zone-role {
+  margin: 0 0 6px;
+  color: rgba(238, 244, 243, 0.68);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.zone-hint,
+.player-zone #handHint {
+  color: rgba(238, 244, 243, 0.78);
+}
+
+.opponent-zone h2,
+.player-zone h2,
+.table-callout h2,
+.reveal-slot h3,
+.compact h2 {
+  color: #f7fbfb;
+}
+
+.opponent-hand {
+  min-height: 96px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  padding: 4px 0 20px;
+}
+
+.card-back {
+  width: 68px;
+  height: 96px;
+  margin-left: calc(var(--offset, 0) * -24px);
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 26%),
+    linear-gradient(135deg, #132027, #2d1c16);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+  position: relative;
+}
+
+.card-back::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d95930, #ef9a22);
+  transform: rotate(-18deg);
+}
+
+.card-back::after {
+  content: "CARD";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: #fff7de;
+  font-weight: 700;
+}
+
+.card-back.counter {
+  margin-left: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.card-back.counter::before,
+.card-back.counter::after {
+  display: none;
+}
+
+.table-middle {
+  padding: 10px 0 24px;
+}
+
+.score-ribbon {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.score-card.compact {
+  min-width: 150px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.score-card.compact .score {
+  color: #fff7de;
+}
+
+.table-callout {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 18px;
+}
+
+.table-callout p {
+  color: rgba(238, 244, 243, 0.86);
+}
+
+.trick-arena {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.arena-stack {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.stack-glow {
+  width: 82px;
+  height: 82px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.46), transparent 35%),
+    linear-gradient(135deg, rgba(255, 214, 118, 0.72), rgba(219, 97, 54, 0.72));
+  filter: blur(0.5px);
+  box-shadow: 0 0 40px rgba(255, 202, 112, 0.25);
+}
+
+.arena-label {
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(238, 244, 243, 0.72);
+}
+
 .hero,
 .panel,
 .score-card {
@@ -183,6 +382,7 @@ button:disabled {
 
 .reveal-slot h3 {
   margin-bottom: 12px;
+  text-align: center;
 }
 
 .played-card {
@@ -200,6 +400,7 @@ button:disabled {
   border-style: solid;
   background: linear-gradient(180deg, #fffefb, #f7ead7);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  color: var(--text);
 }
 
 .played-card.empty {
@@ -239,6 +440,10 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 14px;
+}
+
+.hand-dock {
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
 }
 
 .hand-card {
@@ -307,6 +512,19 @@ button:disabled {
   .summary {
     max-width: none;
   }
+
+  .table-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trick-arena {
+    grid-template-columns: 1fr;
+  }
+
+  .arena-stack {
+    order: 2;
+    min-height: 90px;
+  }
 }
 
 @media (max-width: 680px) {
@@ -314,11 +532,6 @@ button:disabled {
     width: min(100% - 14px, 960px);
     padding-top: 12px;
     padding-bottom: 22px;
-  }
-
-  .scoreboard,
-  .reveal-panel {
-    grid-template-columns: 1fr;
   }
 
   .hero,
@@ -366,6 +579,26 @@ button:disabled {
     font-size: 2.2rem;
   }
 
+  .table-status {
+    grid-template-columns: 1fr;
+  }
+
+  .opponent-hand {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .card-back {
+    width: 56px;
+    height: 82px;
+  }
+
+  .score-ribbon {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .played-card {
     min-height: 116px;
     padding: 10px;
@@ -384,7 +617,8 @@ button:disabled {
     text-align: center;
   }
 
-  .hand {
+  .hand,
+  .hand-dock {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
