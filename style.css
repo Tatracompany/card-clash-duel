@@ -642,8 +642,8 @@ button:disabled {
   min-height: 198px;
   overflow: hidden;
   overflow-y: visible;
-  --card-width: 92px;
-  --card-overlap: 40px;
+  --card-width: 80px;
+  --card-overlap: 42px;
 }
 
 .hand-card {
@@ -655,7 +655,7 @@ button:disabled {
   padding: 0;
   width: var(--card-width);
   min-width: var(--card-width);
-  min-height: calc(var(--card-width) * 1.4);
+  min-height: calc(var(--card-width) * 1.38);
   display: block;
   color: #203040;
   box-shadow: 0 8px 14px rgba(20, 35, 51, 0.14);

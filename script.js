@@ -286,9 +286,9 @@ function renderHand(room) {
   const handCount = Math.max(sortedHand.length, 1);
   const handWidth = (els.hand.clientWidth || els.hand.parentElement?.clientWidth || window.innerWidth - 40) - 8;
   const isCompact = window.innerWidth <= 680;
-  const maxWidth = isCompact ? 64 : 92;
-  const minWidth = isCompact ? 36 : 52;
-  const overlapTarget = isCompact ? 0.62 : 0.5;
+  const maxWidth = isCompact ? 56 : 80;
+  const minWidth = isCompact ? 30 : 46;
+  const overlapTarget = isCompact ? 0.66 : 0.54;
   const computedWidth = Math.floor(handWidth / (1 + (handCount - 1) * (1 - overlapTarget)));
   const cardWidth = Math.max(minWidth, Math.min(maxWidth, computedWidth));
   const overlap = Math.round(cardWidth * overlapTarget);
