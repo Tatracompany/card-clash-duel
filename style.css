@@ -78,9 +78,10 @@ body {
 
 .table-floaters {
   position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-42%);
+  right: 8px;
+  top: auto;
+  bottom: 152px;
+  transform: none;
   z-index: 7;
   pointer-events: none;
 }
@@ -117,13 +118,13 @@ body {
 }
 
 .player-zone {
-  padding-top: 18px;
+  padding-top: 8px;
 }
 
 .hand-side-hud {
   position: absolute;
-  right: 6px;
-  top: -6px;
+  right: 8px;
+  top: -2px;
   display: flex;
   gap: 6px;
   z-index: 7;
@@ -158,7 +159,7 @@ body {
 
 .zone-header {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .zone-role {
@@ -182,12 +183,12 @@ body {
 }
 
 .opponent-hand {
-  min-height: 116px;
+  min-height: 92px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0;
-  padding: 8px 0 22px;
+  padding: 4px 0 10px;
 }
 
 .card-back {
@@ -238,7 +239,7 @@ body {
 }
 
 .table-middle {
-  padding: 0 58px 2px 0;
+  padding: 0 72px 0 0;
 }
 
 .score-ribbon {
@@ -266,7 +267,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 .arena-label {
@@ -557,6 +558,7 @@ button:disabled {
   display: block;
   color: #111827;
   background: #ffffff;
+  border-radius: inherit;
 }
 
 .card-face.red {
@@ -588,12 +590,12 @@ button:disabled {
 }
 
 .corner-rank {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
 .corner-suit {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .card-center {
@@ -609,7 +611,7 @@ button:disabled {
 
 .pip {
   position: absolute;
-  font-size: 1.55em;
+  font-size: 1.15em;
   line-height: 1;
 }
 
@@ -628,26 +630,19 @@ button:disabled {
 .face-layout {
   display: grid;
   place-items: center;
+  gap: 0.12em;
+  padding-top: 0.15em;
 }
 
-.face-rank-mark {
-  position: absolute;
-  left: 50%;
-  top: 18%;
-  transform: translateX(-50%);
-  font-size: 2.2em;
+.face-center-rank {
+  font-size: 2.05em;
   font-weight: 700;
   letter-spacing: 0.03em;
+  line-height: 1;
 }
 
-.face-rank-mark.mirrored {
-  top: auto;
-  bottom: 18%;
-  transform: translateX(-50%) rotate(180deg);
-}
-
-.face-suit-mark {
-  font-size: 2.6em;
+.face-center-suit {
+  font-size: 1.55em;
   line-height: 1;
 }
 
@@ -679,7 +674,7 @@ button:disabled {
 
 .joker-layout {
   display: grid;
-  grid-template-columns: 20px 1fr 20px;
+  grid-template-columns: 15px 1fr 15px;
   align-items: center;
 }
 
@@ -688,7 +683,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72em;
+  font-size: 0.58em;
   font-weight: 700;
   letter-spacing: 0.06em;
   writing-mode: vertical-rl;
@@ -702,16 +697,16 @@ button:disabled {
 .joker-center-mark {
   display: grid;
   justify-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .joker-icon {
-  font-size: 2.3em;
+  font-size: 1.55em;
   line-height: 1;
 }
 
 .joker-name {
-  font-size: 0.85em;
+  font-size: 0.62em;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -751,10 +746,10 @@ button:disabled {
   justify-content: center;
   align-items: flex-end;
   gap: 0;
-  padding: 18px 8px 8px;
-  min-height: 198px;
+  padding: 10px 4px 0;
+  min-height: 146px;
   overflow: hidden;
-  overflow-y: visible;
+  overflow-y: hidden;
   --card-width: 80px;
   --card-overlap: 42px;
 }
@@ -776,6 +771,52 @@ button:disabled {
   margin-left: calc(var(--card-overlap) * -1);
   transform: translateY(var(--lift, 0px)) rotate(var(--rotation, 0deg));
   transform-origin: center bottom;
+}
+
+.hand-card .card-corner.top {
+  top: 5px;
+  left: 5px;
+}
+
+.hand-card .card-corner.bottom {
+  right: 5px;
+  bottom: 5px;
+}
+
+.hand-card .corner-rank {
+  font-size: 0.76rem;
+}
+
+.hand-card .corner-suit {
+  font-size: 0.68rem;
+}
+
+.hand-card .pip {
+  font-size: 0.82em;
+}
+
+.hand-card .face-center-rank {
+  font-size: 1.3em;
+}
+
+.hand-card .face-center-suit {
+  font-size: 0.98em;
+}
+
+.hand-card .joker-layout {
+  grid-template-columns: 12px 1fr 12px;
+}
+
+.hand-card .joker-side {
+  font-size: 0.48em;
+}
+
+.hand-card .joker-icon {
+  font-size: 1.08em;
+}
+
+.hand-card .joker-name {
+  font-size: 0.46em;
 }
 
 .hand-card:first-child {
@@ -922,28 +963,30 @@ button:disabled {
   }
 
   .table-floaters {
-    right: 8px;
-    top: 54%;
+    right: 4px;
+    bottom: 118px;
+    top: auto;
   }
 
   .trump-floater {
-    min-width: 68px;
-    padding: 7px 8px;
+    min-width: 62px;
+    padding: 6px 7px;
   }
 
   .floater-value {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .opponent-hand {
     justify-content: center;
     overflow: hidden;
-    padding-bottom: 14px;
+    min-height: 76px;
+    padding-bottom: 6px;
   }
 
   .card-back {
-    width: 56px;
-    height: 82px;
+    width: 48px;
+    height: 72px;
   }
 
   .score-ribbon {
@@ -952,12 +995,12 @@ button:disabled {
   }
 
   .played-card {
-    min-height: 144px;
+    min-height: 118px;
   }
 
   .trick-card.played-card {
-    width: 78px;
-    min-height: 108px;
+    width: 68px;
+    min-height: 96px;
   }
 
   .trick-card-opponent {
@@ -986,56 +1029,28 @@ button:disabled {
     border-radius: 14px;
   }
 
-  .corner-rank {
-    font-size: 0.9rem;
-  }
-
-  .corner-suit {
-    font-size: 0.8rem;
-  }
-
   .pip {
-    font-size: 1.25em;
+    font-size: 0.92em;
   }
 
-  .face-rank-mark {
-    font-size: 1.7em;
+  .face-center-rank {
+    font-size: 1.5em;
   }
 
-  .face-suit-mark {
-    font-size: 2em;
-  }
-
-  .center-rank {
-    font-size: 1.9rem;
-  }
-
-  .center-suit {
-    font-size: 1.35rem;
-  }
-
-  .joker-title {
-    font-size: 0.84rem;
-  }
-
-  .joker-glyph {
-    font-size: 2rem;
-  }
-
-  .joker-subtitle {
-    font-size: 0.72rem;
+  .face-center-suit {
+    font-size: 1.12em;
   }
 
   .joker-side {
-    font-size: 0.58em;
+    font-size: 0.5em;
   }
 
   .joker-icon {
-    font-size: 1.8em;
+    font-size: 1.2em;
   }
 
   .joker-name {
-    font-size: 0.7em;
+    font-size: 0.5em;
   }
 
   .bid-buttons,
@@ -1062,32 +1077,32 @@ button:disabled {
 
   .hand {
     justify-content: center;
-    min-height: 168px;
+    min-height: 126px;
   }
 
   .hand-side-hud {
     right: 2px;
-    top: -4px;
-    gap: 4px;
+    top: 2px;
+    gap: 3px;
   }
 
   .mini-score {
-    min-width: 46px;
-    padding: 5px 6px;
+    min-width: 42px;
+    padding: 4px 5px;
   }
 
   .mini-score-value {
-    font-size: 1rem;
+    font-size: 0.92rem;
   }
 
   .trick-pile {
-    width: min(196px, 76vw);
-    height: 138px;
+    width: min(168px, 68vw);
+    height: 112px;
   }
 
   .trick-card.played-card {
-    width: 68px;
-    min-height: 96px;
+    width: 56px;
+    min-height: 80px;
   }
 
   .hand-card {
@@ -1095,15 +1110,24 @@ button:disabled {
   }
 
   .pip {
-    font-size: 1.05em;
+    font-size: 0.82em;
   }
 
-  .face-rank-mark {
-    font-size: 1.45em;
+  .face-center-rank {
+    font-size: 1.28em;
   }
 
-  .face-suit-mark {
-    font-size: 1.7em;
+  .face-center-suit {
+    font-size: 0.98em;
+  }
+
+  .table-floaters {
+    bottom: 92px;
+  }
+
+  .trump-floater {
+    min-width: 58px;
+    padding: 5px 6px;
   }
 
   .bid-buttons,

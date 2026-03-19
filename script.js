@@ -13,6 +13,7 @@ const state = {
 
 const $ = (id) => document.getElementById(id);
 const els = {
+  hero: document.querySelector(".hero"),
   banner: $("statusBanner"),
   lobby: $("lobbyPanel"),
   game: $("gamePanel"),
@@ -36,6 +37,7 @@ const els = {
   handTitle: $("handTitle"),
   handHint: $("handHint"),
   hand: $("handContainer"),
+  actionPanel: $("actionPanel"),
   copyInvite: $("copyInviteButton"),
   confirmCard: $("confirmCardButton"),
   bidPanel: $("bidPanel"),
@@ -92,9 +94,8 @@ function pipMarkup(rank, suit) {
 function faceCardMarkup(card) {
   return `
     <div class="face-layout">
-      <div class="face-rank-mark">${card.rank}</div>
-      <div class="face-suit-mark">${suitGlyph(card.suit)}</div>
-      <div class="face-rank-mark mirrored">${card.rank}</div>
+      <div class="face-center-rank">${card.rank}</div>
+      <div class="face-center-suit">${suitGlyph(card.suit)}</div>
     </div>
   `;
 }
@@ -363,9 +364,9 @@ function renderHand(room) {
   const handCount = Math.max(sortedHand.length, 1);
   const handWidth = (els.hand.clientWidth || els.hand.parentElement?.clientWidth || window.innerWidth - 40) - 8;
   const isCompact = window.innerWidth <= 680;
-  const maxWidth = isCompact ? 56 : 80;
-  const minWidth = isCompact ? 30 : 46;
-  const overlapTarget = isCompact ? 0.66 : 0.54;
+  const maxWidth = isCompact ? 50 : 72;
+  const minWidth = isCompact ? 26 : 40;
+  const overlapTarget = isCompact ? 0.7 : 0.58;
   const computedWidth = Math.floor(handWidth / (1 + (handCount - 1) * (1 - overlapTarget)));
   const cardWidth = Math.max(minWidth, Math.min(maxWidth, computedWidth));
   const overlap = Math.round(cardWidth * overlapTarget);
@@ -410,6 +411,7 @@ function renderHand(room) {
 }
 
 function renderRoom(room) {
+  if (els.hero) els.hero.hidden = true;
   els.lobby.hidden = true;
   els.game.hidden = false;
   hideActionPanels();
@@ -451,6 +453,7 @@ function renderRoom(room) {
     || state.loading
     || (room.phase === "discard" ? state.selectedCardIds.length !== 3 : state.selectedCardIds.length !== 1);
   els.confirmCard.textContent = getConfirmCardLabel(room);
+  els.actionPanel.hidden = els.copyInvite.hidden && els.confirmCard.hidden;
 
   if (room.actions.canBid) {
     els.bidPanel.hidden = false;
@@ -498,6 +501,7 @@ function roomCardLabel(card) {
 
 function render() {
   if (!state.room) {
+    if (els.hero) els.hero.hidden = false;
     els.lobby.hidden = false;
     els.game.hidden = true;
     els.lobbyText.textContent = `You are ${state.guestName}. Start a private room and share the invite link with your friend.`;
