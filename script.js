@@ -113,6 +113,38 @@ function jokerMarkup(card) {
   `;
 }
 
+function compactHandCardMarkup(card) {
+  if (!card) return "?";
+  const isRed = card.suit === "Heart" || card.suit === "Diamond";
+  const colorClass = isRed ? "red" : "black";
+  if (card.rank === "Joker") {
+    return `
+      <div class="compact-card-face joker ${colorClass}">
+        <div class="compact-corner compact-top">JOKER</div>
+        <div class="compact-joker-icon">${card.suit === "Color" ? "✦" : "✶"}</div>
+        <div class="compact-joker-name">${card.suit === "Color" ? "COLOR" : "GRAY"}</div>
+        <div class="compact-corner compact-bottom">JOKER</div>
+      </div>
+    `;
+  }
+  return `
+    <div class="compact-card-face ${colorClass}">
+      <div class="compact-corner compact-top">
+        <span class="compact-rank">${card.rank}</span>
+        <span class="compact-suit">${suitGlyph(card.suit)}</span>
+      </div>
+      <div class="compact-center">
+        <div class="compact-rank large">${card.rank}</div>
+        <div class="compact-suit large">${suitGlyph(card.suit)}</div>
+      </div>
+      <div class="compact-corner compact-bottom">
+        <span class="compact-rank">${card.rank}</span>
+        <span class="compact-suit">${suitGlyph(card.suit)}</span>
+      </div>
+    </div>
+  `;
+}
+
 function sessionStoreKey() {
   return "card-clash-room-sessions";
 }
@@ -390,7 +422,7 @@ function renderHand(room) {
     if (room.followSuit && card.rank !== "Joker" && card.suit !== room.followSuit) {
       button.classList.add("muted");
     }
-    button.innerHTML = deckStyleCardMarkup(card);
+    button.innerHTML = compactHandCardMarkup(card);
     button.addEventListener("click", () => {
       if (!room.actions.canChooseHandCard || state.loading) return;
       if (room.phase === "discard") {
