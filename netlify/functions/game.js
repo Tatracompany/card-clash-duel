@@ -8,9 +8,6 @@ const {
   applyAction,
 } = require("../../game-core");
 
-const roomsStore = getStore("rooms");
-const metaStore = getStore("meta");
-
 function json(statusCode, body) {
   return {
     statusCode,
@@ -23,15 +20,18 @@ function json(statusCode, body) {
 }
 
 async function saveRoom(room) {
+  const roomsStore = getStore("rooms");
   await roomsStore.setJSON(`room:${room.roomCode}`, room);
 }
 
 async function loadRoom(roomCode) {
+  const roomsStore = getStore("rooms");
   if (!roomCode) return null;
   return roomsStore.get(`room:${String(roomCode).toUpperCase()}`, { type: "json" });
 }
 
 async function clearQuickMatchIfMatches(playerId) {
+  const metaStore = getStore("meta");
   const queue = await metaStore.get("quick-match", { type: "json" });
   if (queue && queue.playerId === playerId) {
     await metaStore.delete("quick-match");
@@ -40,6 +40,9 @@ async function clearQuickMatchIfMatches(playerId) {
 
 exports.handler = async (event) => {
   try {
+    const metaStore = getStore("meta");
+    const roomsStore = getStore("rooms");
+
     if (event.httpMethod === "GET") {
       const params = event.queryStringParameters || {};
       if (params.op !== "state") {
