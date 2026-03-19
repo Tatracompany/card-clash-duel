@@ -20,15 +20,10 @@
 
     <section class="panel" id="lobbyPanel">
       <h2>Lobby</h2>
-      <p>Enter a player name, then create a room, join a friend, or let the server find a match.</p>
-      <div class="lobby-grid">
-        <input id="nameInput" class="text-input" type="text" maxlength="24" placeholder="Player name" autocomplete="nickname" enterkeyhint="done">
-        <input id="roomCodeInput" class="text-input" type="text" maxlength="12" placeholder="Room code" autocapitalize="characters" autocomplete="off" enterkeyhint="go">
-      </div>
+      <p id="lobbyText">Start a private table, then share the invite link with your friend. No names or room codes needed.</p>
       <div class="actions">
         <button id="quickMatchButton" class="secondary" type="button">Quick Match</button>
-        <button id="createRoomButton" class="primary" type="button">Create Room</button>
-        <button id="joinRoomButton" class="secondary" type="button">Join Room</button>
+        <button id="createRoomButton" class="primary" type="button">Start Private Room</button>
       </div>
     </section>
 
@@ -38,6 +33,10 @@
           <div class="status-chip">
             <span class="chip-label">Room</span>
             <span id="roomCodeLabel" class="chip-value">Room</span>
+          </div>
+          <div class="status-chip">
+            <span class="chip-label">Invite</span>
+            <span id="inviteLinkLabel" class="chip-value">Create a room to get a link</span>
           </div>
           <div class="status-chip">
             <span class="chip-label">Players</span>
@@ -110,6 +109,7 @@
       </section>
 
       <section class="panel controls-panel" id="actionPanel">
+        <button id="copyInviteButton" class="secondary" type="button" hidden>Copy Invite Link</button>
         <button id="continueButton" class="secondary" type="button" hidden>Continue</button>
         <button id="confirmCardButton" class="primary" type="button" hidden>Confirm Card</button>
         <button id="drawOneButton" class="secondary" type="button" hidden>Draw One Card</button>

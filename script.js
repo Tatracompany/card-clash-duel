@@ -3,6 +3,7 @@ const state = {
   room: null,
   loading: false,
   selectedCardId: null,
+  guestName: loadGuestName(),
 };
 
 const $ = (id) => document.getElementById(id);
@@ -10,9 +11,9 @@ const els = {
   banner: $("statusBanner"),
   lobby: $("lobbyPanel"),
   game: $("gamePanel"),
-  name: $("nameInput"),
-  roomCodeInput: $("roomCodeInput"),
+  lobbyText: $("lobbyText"),
   roomCode: $("roomCodeLabel"),
+  inviteLink: $("inviteLinkLabel"),
   players: $("roomPlayers"),
   opponentName: $("opponentName"),
   opponentHint: $("opponentHint"),
@@ -29,6 +30,7 @@ const els = {
   handHint: $("handHint"),
   hand: $("handContainer"),
   continue: $("continueButton"),
+  copyInvite: $("copyInviteButton"),
   confirmCard: $("confirmCardButton"),
   drawOne: $("drawOneButton"),
   bidPanel: $("bidPanel"),
@@ -50,6 +52,17 @@ function setBanner(text) {
   els.banner.textContent = text;
 }
 
+function loadGuestName() {
+  const key = "card-clash-guest-name";
+  const existing = localStorage.getItem(key);
+  if (existing) {
+    return existing;
+  }
+  const generated = `Guest ${Math.floor(1000 + Math.random() * 9000)}`;
+  localStorage.setItem(key, generated);
+  return generated;
+}
+
 function send(type, payload = {}) {
   if (!state.socket || state.socket.readyState !== WebSocket.OPEN) {
     setBanner("Connection lost. Refresh to reconnect.");
@@ -63,7 +76,13 @@ function connect() {
   state.socket = new WebSocket(`${protocol}//${location.host}`);
 
   state.socket.addEventListener("open", () => {
-    setBanner("Connected. Create a room, join a room, or use quick match.");
+    setBanner("Connected. Start a private room or use quick match.");
+    const roomCode = new URLSearchParams(location.search).get("room");
+    if (roomCode) {
+      state.loading = true;
+      render();
+      send("join_room", { name: state.guestName, roomCode: roomCode.toUpperCase() });
+    }
   });
 
   state.socket.addEventListener("close", () => {
@@ -87,15 +106,6 @@ function connect() {
       render();
     }
   });
-}
-
-function requireName() {
-  const name = els.name.value.trim();
-  if (!name) {
-    setBanner("Enter your name first.");
-    return null;
-  }
-  return name;
 }
 
 function cardMarkup(card) {
@@ -199,6 +209,14 @@ function renderRoom(room) {
   hideActionPanels();
 
   els.roomCode.textContent = room.roomCode ? `Room: ${room.roomCode}` : "Quick Match";
+  const inviteUrl = room.roomCode ? `${location.origin}?room=${encodeURIComponent(room.roomCode)}` : "";
+  if (room.roomCode) {
+    const currentRoom = new URLSearchParams(location.search).get("room");
+    if (currentRoom !== room.roomCode) {
+      history.replaceState({}, "", `?room=${encodeURIComponent(room.roomCode)}`);
+    }
+  }
+  els.inviteLink.textContent = inviteUrl || "Create a room to get a link";
   els.players.textContent = `You: ${room.you.name} | Opponent: ${room.opponent ? room.opponent.name : "Waiting..."}`;
   els.opponentName.textContent = room.opponent ? room.opponent.name : "Waiting...";
   els.opponentHint.textContent = `${room.opponentHandCount || 0} card${room.opponentHandCount === 1 ? "" : "s"}`;
@@ -217,6 +235,8 @@ function renderRoom(room) {
 
   els.continue.hidden = !room.actions.canContinue;
   els.continue.disabled = !room.actions.canContinue || state.loading;
+  els.copyInvite.hidden = !room.roomCode;
+  els.copyInvite.disabled = state.loading || !room.roomCode;
   els.confirmCard.hidden = !room.actions.canChooseHandCard;
   els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
   els.confirmCard.textContent = getConfirmCardLabel(room);
@@ -256,44 +276,39 @@ function render() {
   if (!state.room) {
     els.lobby.hidden = false;
     els.game.hidden = true;
+    els.lobbyText.textContent = `You are ${state.guestName}. Start a private room and share the invite link with your friend.`;
     return;
   }
   renderRoom(state.room);
 }
 
 $("quickMatchButton").addEventListener("click", () => {
-  const name = requireName();
-  if (!name) return;
   state.loading = true;
   render();
-  send("quick_match", { name });
+  send("quick_match", { name: state.guestName });
 });
 
 $("createRoomButton").addEventListener("click", () => {
-  const name = requireName();
-  if (!name) return;
   state.loading = true;
   render();
-  send("create_room", { name });
-});
-
-$("joinRoomButton").addEventListener("click", () => {
-  const name = requireName();
-  if (!name) return;
-  const roomCode = els.roomCodeInput.value.trim().toUpperCase();
-  if (!roomCode) {
-    setBanner("Enter a room code to join.");
-    return;
-  }
-  state.loading = true;
-  render();
-  send("join_room", { name, roomCode });
+  send("create_room", { name: state.guestName });
 });
 
 els.continue.addEventListener("click", () => {
   state.loading = true;
   render();
   send("action", { action: "continue" });
+});
+
+els.copyInvite.addEventListener("click", async () => {
+  if (!state.room?.roomCode) return;
+  const inviteUrl = `${location.origin}?room=${encodeURIComponent(state.room.roomCode)}`;
+  try {
+    await navigator.clipboard.writeText(inviteUrl);
+    setBanner("Invite link copied.");
+  } catch {
+    setBanner(inviteUrl);
+  }
 });
 
 els.confirmCard.addEventListener("click", () => {
