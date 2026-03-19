@@ -165,7 +165,7 @@ body {
 }
 
 .table-middle {
-  padding: 2px 0 10px;
+  padding: 0 0 4px;
 }
 
 .score-ribbon {
@@ -190,7 +190,7 @@ body {
 .table-callout {
   text-align: center;
   max-width: 700px;
-  margin: 0 auto 18px;
+  margin: 0 auto 10px;
 }
 
 .table-callout p {
@@ -201,64 +201,65 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 26px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .arena-label {
   margin: 0;
-  padding: 6px 10px;
+  padding: 5px 9px;
   border-radius: 999px;
   background: rgba(255, 228, 162, 0.15);
   border: 1px solid rgba(255, 210, 104, 0.38);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #ffd85a;
 }
 
 .trick-pile {
   position: relative;
-  width: min(320px, 74vw);
-  height: 240px;
+  width: min(220px, 62vw);
+  height: 154px;
 }
 
 .trick-seat {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #e5edcc;
   font-weight: 700;
 }
 
 .trick-seat-top {
-  top: 0;
+  top: 2px;
 }
 
 .trick-seat-bottom {
-  bottom: 4px;
+  bottom: 0;
 }
 
 .trick-card {
   position: absolute;
-  width: 120px;
-  min-height: 168px;
+  width: 92px;
+  min-height: 128px;
+  border-radius: 14px;
 }
 
 .trick-card-opponent {
-  top: 32px;
-  left: 54%;
-  transform: translateX(-50%) rotate(9deg);
+  top: 12px;
+  left: 55%;
+  transform: translateX(-50%) rotate(8deg);
 }
 
 .trick-card-player {
-  bottom: 24px;
-  left: 46%;
-  transform: translateX(-50%) rotate(-10deg);
+  bottom: 10px;
+  left: 45%;
+  transform: translateX(-50%) rotate(-8deg);
 }
 
 .hero,
@@ -422,6 +423,10 @@ button:disabled {
   font-size: 2rem;
   font-weight: 700;
   padding: 0;
+}
+
+.trick-card.played-card {
+  min-height: 128px;
 }
 
 .draw-panel .played-card {
@@ -644,7 +649,8 @@ button:disabled {
   }
 
   .trick-pile {
-    height: 220px;
+    width: min(200px, 70vw);
+    height: 142px;
   }
 }
 
@@ -724,6 +730,19 @@ button:disabled {
     min-height: 144px;
   }
 
+  .trick-card.played-card {
+    width: 82px;
+    min-height: 114px;
+  }
+
+  .trick-card-opponent {
+    top: 14px;
+  }
+
+  .trick-card-player {
+    bottom: 10px;
+  }
+
   .draw-panel .played-card {
     width: min(132px, 100%);
     min-height: 186px;
@@ -795,6 +814,16 @@ button:disabled {
   .hand {
     justify-content: center;
     min-height: 168px;
+  }
+
+  .trick-pile {
+    width: min(180px, 72vw);
+    height: 126px;
+  }
+
+  .trick-card.played-card {
+    width: 72px;
+    min-height: 102px;
   }
 
   .hand-card {
