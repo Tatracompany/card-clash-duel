@@ -94,11 +94,8 @@ function pipMarkup(rank, suit) {
 function faceCardMarkup(card) {
   return `
     <div class="face-layout">
-      <div class="face-center-badge">
-        <div class="face-center-suit top">${suitGlyph(card.suit)}</div>
-        <div class="face-center-rank">${card.rank}</div>
-        <div class="face-center-suit bottom">${suitGlyph(card.suit)}</div>
-      </div>
+      <div class="face-center-rank">${card.rank}</div>
+      <div class="face-center-suit">${suitGlyph(card.suit)}</div>
     </div>
   `;
 }
