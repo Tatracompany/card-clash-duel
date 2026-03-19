@@ -6,6 +6,7 @@ const state = {
   session: loadSession(),
   pollTimer: null,
   loading: false,
+  selectedCardId: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -32,6 +33,7 @@ const els = {
   handHint: $("handHint"),
   hand: $("handContainer"),
   continue: $("continueButton"),
+  confirmCard: $("confirmCardButton"),
   bidPanel: $("bidPanel"),
   suitPanel: $("suitPickerPanel"),
   suitText: $("suitPickerText"),
@@ -119,6 +121,16 @@ function hideActionPanels() {
   els.drawPanel.hidden = true;
 }
 
+function getConfirmCardLabel(room) {
+  if (room.phase === "discard") {
+    return "Discard Selected Card";
+  }
+  if (room.phase === "play") {
+    return "Play Selected Card";
+  }
+  return "Confirm Card";
+}
+
 function renderHand(room) {
   els.hand.innerHTML = "";
   const sortedHand = [...room.yourHand].sort((left, right) => {
@@ -134,12 +146,21 @@ function renderHand(room) {
     button.className = "hand-card";
     button.type = "button";
     button.disabled = !room.actions.canChooseHandCard || state.loading;
+    if (state.selectedCardId === card.id) {
+      button.classList.add("selected");
+    }
     button.innerHTML = `
       <div class="suit">${card.symbol}</div>
       <div class="rank">${card.rank}</div>
       <div class="power">${card.label}</div>
     `;
-    button.addEventListener("click", () => performAction("choose_hand_card", { cardId: card.id }));
+    button.addEventListener("click", () => {
+      if (!room.actions.canChooseHandCard || state.loading) {
+        return;
+      }
+      state.selectedCardId = card.id;
+      render();
+    });
     els.hand.appendChild(button);
   });
 }
@@ -188,6 +209,9 @@ function renderRoom(room) {
 
   els.continue.hidden = !room.actions.canContinue;
   els.continue.disabled = !room.actions.canContinue || state.loading;
+  els.confirmCard.hidden = !room.actions.canChooseHandCard;
+  els.confirmCard.disabled = !room.actions.canChooseHandCard || state.loading || !state.selectedCardId;
+  els.confirmCard.textContent = getConfirmCardLabel(room);
 
   if (room.actions.canBid) {
     els.bidPanel.hidden = false;
@@ -238,6 +262,9 @@ async function syncState() {
     });
     const data = await api("GET", null, `?${params.toString()}`);
     state.room = data.room;
+    if (!state.room.yourHand.some((card) => card.id === state.selectedCardId)) {
+      state.selectedCardId = null;
+    }
     render();
   } catch (error) {
     setBanner(error.message);
@@ -268,6 +295,7 @@ async function beginSession(op, payload) {
       name: payload.name,
     });
     state.room = data.room;
+    state.selectedCardId = null;
     startPolling();
     setBanner("Connected to room.");
   } catch (error) {
@@ -292,6 +320,7 @@ async function performAction(action, payload = {}) {
       payload,
     });
     state.room = data.room;
+    state.selectedCardId = null;
   } catch (error) {
     setBanner(error.message);
   } finally {
@@ -331,6 +360,12 @@ $("joinRoomButton").addEventListener("click", () => {
 });
 
 els.continue.addEventListener("click", () => performAction("continue"));
+els.confirmCard.addEventListener("click", () => {
+  if (!state.selectedCardId) {
+    return;
+  }
+  performAction("choose_hand_card", { cardId: state.selectedCardId });
+});
 els.keepFirst.addEventListener("click", () => performAction("draw_keep_first"));
 els.rejectFirst.addEventListener("click", () => performAction("draw_reject_first"));
 

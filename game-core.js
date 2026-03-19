@@ -242,6 +242,7 @@ function buildHandHint(room, playerIndex) {
 function buildRoomView(room, playerIndex) {
   const highBid = Math.max(...room.bids.filter((v) => v !== null), 4);
   return {
+    phase: room.phase,
     roomCode: room.roomCode,
     you: { name: room.players[playerIndex]?.name || "You" },
     opponent: room.players[playerIndex === 0 ? 1 : 0] ? { name: room.players[playerIndex === 0 ? 1 : 0].name } : null,

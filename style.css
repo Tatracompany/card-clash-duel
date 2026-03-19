@@ -462,8 +462,9 @@ button:disabled {
 }
 
 .hand-card.selected {
-  outline: 3px solid rgba(175, 59, 43, 0.28);
-  transform: translateY(-2px);
+  outline: 3px solid rgba(195, 75, 47, 0.78);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 28px rgba(195, 75, 47, 0.2);
 }
 
 .hand-card .suit {
