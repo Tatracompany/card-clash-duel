@@ -27,6 +27,7 @@ const els = {
   score2: $("score2"),
   handInfo: $("handInfoText"),
   trump: $("trumpSuitText"),
+  floatingTrump: $("floatingTrumpText"),
   phaseTitle: $("phaseTitle"),
   status: $("statusText"),
   played1: $("playedCard1"),
@@ -352,6 +353,7 @@ function renderRoom(room) {
   els.score2.textContent = String(room.matchPoints[1]);
   els.handInfo.textContent = room.handInfo;
   els.trump.textContent = room.trumpSuit || "Not chosen yet";
+  els.floatingTrump.textContent = room.trumpSuit || "Not chosen";
   els.phaseTitle.textContent = room.phaseTitle;
   els.status.textContent = room.statusText;
   els.handTitle.textContent = room.handTitle;

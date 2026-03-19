@@ -54,6 +54,13 @@
         </section>
 
         <section class="table-board panel">
+          <aside class="table-floaters" aria-label="Table info">
+            <div class="trump-floater">
+              <span class="floater-label">Trump</span>
+              <span id="floatingTrumpText" class="floater-value">Not chosen</span>
+            </div>
+          </aside>
+
           <div class="opponent-zone">
             <div class="zone-header">
               <p class="zone-role">Opponent</p>
@@ -64,18 +71,7 @@
           </div>
 
           <div class="table-middle">
-            <section class="score-ribbon" aria-label="Scoreboard">
-              <article class="score-card compact">
-                <h2>You</h2>
-                <p id="score1" class="score">0</p>
-              </article>
-              <article class="score-card compact">
-                <h2>Opponent</h2>
-                <p id="score2" class="score">0</p>
-              </article>
-            </section>
-
-            <section class="table-callout">
+            <section class="table-callout" hidden>
               <h2 id="phaseTitle">Waiting</h2>
               <p id="statusText">Waiting for the server.</p>
             </section>
@@ -92,6 +88,16 @@
           </div>
 
           <div class="player-zone">
+            <div class="hand-side-hud" aria-label="Score badges">
+              <article class="mini-score">
+                <span class="mini-score-label">You</span>
+                <span id="score1" class="mini-score-value">0</span>
+              </article>
+              <article class="mini-score">
+                <span class="mini-score-label">Opp</span>
+                <span id="score2" class="mini-score-value">0</span>
+              </article>
+            </div>
             <div class="hand-header">
               <div>
                 <p class="zone-role">You</p>
