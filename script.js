@@ -32,6 +32,7 @@ const els = {
   status: $("statusText"),
   played1: $("playedCard1"),
   played2: $("playedCard2"),
+  trickPile: $("trickPile"),
   handTitle: $("handTitle"),
   handHint: $("handHint"),
   hand: $("handContainer"),
@@ -304,7 +305,7 @@ function deckStyleCardMarkup(card) {
 function renderPlayed(el, card) {
   if (!card) {
     el.className = "played-card empty";
-    el.textContent = "?";
+    el.textContent = "";
     return;
   }
   el.className = "played-card revealed";
@@ -432,10 +433,14 @@ function renderRoom(room) {
   els.floatingTrump.textContent = room.trumpSuit || "Not chosen";
   els.phaseTitle.textContent = room.phaseTitle;
   els.status.textContent = room.statusText;
-  els.handTitle.textContent = room.handTitle;
-  els.handHint.textContent = room.handHint;
   renderPlayed(els.played1, room.playedCards[0]);
   renderPlayed(els.played2, room.playedCards[1]);
+  const hasPlayedCards = Boolean(room.playedCards[0] || room.playedCards[1]);
+  if (els.trickPile) {
+    els.trickPile.classList.toggle("empty-state", !hasPlayedCards);
+  }
+  if (els.handTitle) els.handTitle.textContent = room.handTitle;
+  if (els.handHint) els.handHint.textContent = room.handHint;
   renderOpponentHand(room);
   renderHand(room);
 

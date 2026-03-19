@@ -116,6 +116,10 @@ body {
   position: relative;
 }
 
+.player-zone {
+  padding-top: 18px;
+}
+
 .hand-side-hud {
   position: absolute;
   right: 6px;
@@ -278,10 +282,19 @@ body {
   color: #ffd85a;
 }
 
+.trick-pile.empty-state + .arena-label {
+  display: none;
+}
+
 .trick-pile {
   position: relative;
   width: min(250px, 68vw);
   height: 172px;
+}
+
+.trick-pile.empty-state {
+  width: 0;
+  height: 0;
 }
 
 .trick-pile::before {
@@ -291,6 +304,12 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.08) 58%, transparent 72%);
   filter: blur(1px);
+}
+
+.trick-pile.empty-state::before,
+.trick-pile.empty-state .trick-seat,
+.trick-pile.empty-state .played-card.empty {
+  display: none;
 }
 
 .trick-seat {
@@ -525,8 +544,10 @@ button:disabled {
 }
 
 .played-card.empty {
-  color: rgba(250, 250, 242, 0.75);
-  background: rgba(255, 255, 255, 0.08);
+  color: transparent;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .card-face {
@@ -721,6 +742,10 @@ button:disabled {
   padding-right: 116px;
 }
 
+.hand-header:empty {
+  display: none;
+}
+
 .hand {
   display: flex;
   justify-content: center;
@@ -793,11 +818,8 @@ button:disabled {
   opacity: 0.68;
 }
 
-.rules ul {
-  margin-bottom: 0;
-  padding-left: 20px;
-  color: var(--muted);
-  line-height: 1.55;
+.rules {
+  display: none;
 }
 
 .suit-buttons {

@@ -77,7 +77,7 @@
             </section>
 
             <section class="trick-arena">
-              <div class="trick-pile" aria-label="Current trick">
+              <div id="trickPile" class="trick-pile empty-state" aria-label="Current trick">
                 <div class="trick-seat trick-seat-top">Opponent</div>
                 <div id="playedCard2" class="played-card trick-card trick-card-opponent empty">?</div>
                 <div id="playedCard1" class="played-card trick-card trick-card-player empty">?</div>
@@ -97,13 +97,6 @@
                 <span class="mini-score-label">Opp</span>
                 <span id="score2" class="mini-score-value">0</span>
               </article>
-            </div>
-            <div class="hand-header">
-              <div>
-                <p class="zone-role">You</p>
-                <h2 id="handTitle">Your Hand</h2>
-              </div>
-              <p id="handHint">Only your cards are visible on this computer.</p>
             </div>
             <div id="handContainer" class="hand hand-fan" role="list"></div>
           </div>
@@ -155,17 +148,6 @@
         <div id="drawPreviewCard" class="played-card empty">?</div>
       </section>
 
-      <section class="panel rules">
-        <h2>How To Play</h2>
-        <ul>
-          <li>Two players join the same room or use quick match.</li>
-          <li>Each hand starts with 5 cards per player and bidding from 5 to 9 or pass.</li>
-          <li>The bid winner chooses trump, both players discard 3 cards, and both use the special draw phase.</li>
-          <li>Hands refill to 9 cards, then all 9 tricks are played.</li>
-          <li>If the contractor makes the bid, they score that many match points.</li>
-          <li>The match continues with new hands until one player reaches 21 points first.</li>
-        </ul>
-      </section>
     </section>
   </main>
 
