@@ -430,6 +430,17 @@ button:disabled {
   margin: 0 auto 16px;
 }
 
+.draw-preview-panel {
+  border-color: rgba(255, 219, 110, 0.28);
+  box-shadow: 0 10px 24px rgba(255, 206, 92, 0.12);
+}
+
+.draw-preview-panel .played-card {
+  width: min(132px, 100%);
+  min-height: 186px;
+  margin: 0 auto;
+}
+
 .played-card.revealed {
   border-style: solid;
   background: linear-gradient(180deg, #fffefb, #f7ead7);
@@ -684,6 +695,11 @@ button:disabled {
   .draw-panel .played-card {
     width: min(132px, 100%);
     min-height: 186px;
+  }
+
+  .draw-preview-panel .played-card {
+    width: min(120px, 100%);
+    min-height: 172px;
   }
 
   .card-rank {

@@ -4,6 +4,9 @@ const state = {
   loading: false,
   selectedCardIds: [],
   guestName: loadGuestName(),
+  previewCard: null,
+  lastDrawResultNonce: 0,
+  previewTimer: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -39,6 +42,9 @@ const els = {
   drawnCard: $("drawnCard"),
   keepFirst: $("keepFirstButton"),
   rejectFirst: $("rejectFirstButton"),
+  drawPreviewPanel: $("drawPreviewPanel"),
+  drawPreviewText: $("drawPreviewText"),
+  drawPreviewCard: $("drawPreviewCard"),
 };
 
 const bidButtons = Array.from(document.querySelectorAll(".bid-button"));
@@ -48,6 +54,18 @@ const rankOrder = { A: 0, K: 1, Q: 2, J: 3, 10: 4, 9: 5, 8: 6, 7: 7, 6: 8, Joker
 
 function setBanner(text) {
   els.banner.textContent = text;
+}
+
+function showDrawPreview(card) {
+  state.previewCard = card;
+  if (state.previewTimer) {
+    clearTimeout(state.previewTimer);
+  }
+  state.previewTimer = setTimeout(() => {
+    state.previewCard = null;
+    state.previewTimer = null;
+    render();
+  }, 1500);
 }
 
 function loadGuestName() {
@@ -103,6 +121,10 @@ function connect() {
       if (state.room.phase !== "discard" && state.selectedCardIds.length > 1) {
         state.selectedCardIds = state.selectedCardIds.slice(0, 1);
       }
+      if (state.room.drawResult && state.room.drawResultNonce > state.lastDrawResultNonce) {
+        state.lastDrawResultNonce = state.room.drawResultNonce;
+        showDrawPreview(state.room.drawResult);
+      }
       render();
     }
   });
@@ -149,6 +171,7 @@ function hideActionPanels() {
   els.bidPanel.hidden = true;
   els.suitPanel.hidden = true;
   els.drawPanel.hidden = true;
+  els.drawPreviewPanel.hidden = true;
 }
 
 function getConfirmCardLabel(room) {
@@ -291,6 +314,21 @@ function renderRoom(room) {
     els.drawnCard.className = "played-card empty";
     els.drawnCard.textContent = "?";
   }
+
+  if (state.previewCard) {
+    els.drawPreviewPanel.hidden = false;
+    els.drawPreviewText.textContent = `You were forced to take ${roomCardLabel(state.previewCard)}.`;
+    els.drawPreviewCard.className = "played-card revealed";
+    els.drawPreviewCard.innerHTML = cardMarkup(state.previewCard);
+  } else {
+    els.drawPreviewCard.className = "played-card empty";
+    els.drawPreviewCard.textContent = "?";
+  }
+}
+
+function roomCardLabel(card) {
+  if (!card) return "that card";
+  return card.rank === "Joker" ? `${card.suit} Joker` : `${card.rank} of ${card.suit}`;
 }
 
 function render() {

@@ -80,11 +80,13 @@ function createRoom(roomCode = randomCode()) {
     roundsPlayed: 0,
     selectedCards: [null, null],
     lastTrickWinner: null,
-    discardCounts: [0, 0],
-    drawQueue: [],
-    drawChoice: null,
-  };
-}
+      discardCounts: [0, 0],
+      drawQueue: [],
+      drawChoice: null,
+      lastDrawResult: [null, null],
+      drawResultNonce: [0, 0],
+    };
+  }
 
 function attachPlayer(room, name) {
   const player = {
@@ -117,6 +119,8 @@ function startHand(room) {
   room.discardCounts = [0, 0];
   room.drawQueue = [];
   room.drawChoice = null;
+  room.lastDrawResult = [null, null];
+  room.drawResultNonce = [0, 0];
   room.updatedAt = Date.now();
 }
 
@@ -261,14 +265,16 @@ function buildRoomView(room, playerIndex) {
     handHint: buildHandHint(room, playerIndex),
     yourHand: room.hands[playerIndex].map(publicCard),
     playedCards: room.selectedCards.map(publicCard),
-    allowedBids: BID_VALUES.filter((bid) => bid > highBid),
-    suitPrompt: "Choose the strongest suit.",
-    drawChoice: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
-      ? { firstCard: publicCard(room.drawChoice.firstCard) }
-      : null,
-    drawPrompt: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
-      ? `${room.phase === "refill" ? "Refill card" : "First card"}: ${cardLabel(room.drawChoice.firstCard)}`
-      : "",
+      allowedBids: BID_VALUES.filter((bid) => bid > highBid),
+      suitPrompt: "Choose the strongest suit.",
+      drawChoice: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
+        ? { firstCard: publicCard(room.drawChoice.firstCard) }
+        : null,
+      drawResult: room.lastDrawResult[playerIndex] ? publicCard(room.lastDrawResult[playerIndex]) : null,
+      drawResultNonce: room.drawResultNonce[playerIndex] || 0,
+      drawPrompt: ["draw", "refill"].includes(room.phase) && room.currentPlayer === playerIndex && room.drawChoice
+        ? `${room.phase === "refill" ? "Refill card" : "First card"}: ${cardLabel(room.drawChoice.firstCard)}`
+        : "",
     actions: {
       canBid: room.phase === "bid" && room.currentPlayer === playerIndex,
       canChooseTrump: room.phase === "chooseTrump" && room.bidWinner === playerIndex,
@@ -457,9 +463,14 @@ function applyAction(room, playerIndex, action, payload = {}) {
     if (action === "draw_keep_first") {
       room.hands[playerIndex].push(room.drawChoice.firstCard);
       if (room.drawChoice.secondCard) room.discardPile.push(room.drawChoice.secondCard);
+      room.lastDrawResult[playerIndex] = null;
     } else {
       room.discardPile.push(room.drawChoice.firstCard);
-      if (room.drawChoice.secondCard) room.hands[playerIndex].push(room.drawChoice.secondCard);
+      if (room.drawChoice.secondCard) {
+        room.hands[playerIndex].push(room.drawChoice.secondCard);
+        room.lastDrawResult[playerIndex] = room.drawChoice.secondCard;
+        room.drawResultNonce[playerIndex] += 1;
+      }
     }
     if (room.phase === "draw" && playerIndex === room.drawQueue[0]) {
       room.currentPlayer = room.drawQueue[1];
