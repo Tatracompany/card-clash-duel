@@ -461,7 +461,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   color: #111827;
-  background: linear-gradient(180deg, #fffefb 0%, #f7f0e2 100%);
+  background: #fffdf8;
 }
 
 .card-face.red {
@@ -524,6 +524,30 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.joker-center {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.joker-title {
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+}
+
+.joker-glyph {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.joker-subtitle {
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
 .hand-header {
   display: flex;
   justify-content: space-between;
@@ -539,25 +563,33 @@ button:disabled {
   gap: 0;
   padding: 18px 8px 8px;
   min-height: 198px;
-  overflow-x: auto;
+  overflow: hidden;
   overflow-y: visible;
+  --card-width: 124px;
+  --card-overlap: 34px;
 }
 
 .hand-card {
+  appearance: none;
+  -webkit-appearance: none;
   background: var(--card-front);
   border: 1px solid rgba(28, 36, 48, 0.16);
   border-radius: 18px;
   padding: 0;
-  width: 124px;
-  min-width: 124px;
-  min-height: 176px;
+  width: var(--card-width);
+  min-width: var(--card-width);
+  min-height: calc(var(--card-width) * 1.42);
   display: block;
   color: #203040;
   box-shadow: 0 10px 18px rgba(20, 35, 51, 0.14);
   overflow: hidden;
-  margin-left: -34px;
+  margin-left: calc(var(--card-overlap) * -1);
   transform: translateY(var(--lift, 0px)) rotate(var(--rotation, 0deg));
   transform-origin: center bottom;
+}
+
+.hand-card:first-child {
+  margin-left: 0;
 }
 
 .hand-card:disabled {
@@ -674,7 +706,7 @@ button:disabled {
 
   .opponent-hand {
     justify-content: center;
-    overflow-x: auto;
+    overflow: hidden;
     padding-bottom: 14px;
   }
 
@@ -707,11 +739,7 @@ button:disabled {
   }
 
   .hand-card {
-    width: 102px;
-    min-width: 102px;
-    min-height: 144px;
     border-radius: 14px;
-    margin-left: -22px;
   }
 
   .corner-rank {
@@ -728,6 +756,18 @@ button:disabled {
 
   .center-suit {
     font-size: 1.35rem;
+  }
+
+  .joker-title {
+    font-size: 0.84rem;
+  }
+
+  .joker-glyph {
+    font-size: 2rem;
+  }
+
+  .joker-subtitle {
+    font-size: 0.72rem;
   }
 
   .bid-buttons,
@@ -753,15 +793,12 @@ button:disabled {
   }
 
   .hand {
-    justify-content: flex-start;
+    justify-content: center;
     min-height: 168px;
   }
 
   .hand-card {
-    width: 88px;
-    min-width: 88px;
-    min-height: 126px;
-    margin-left: -18px;
+    border-radius: 12px;
   }
 
   .bid-buttons,

@@ -135,7 +135,13 @@ function cardMarkup(card) {
   const isRed = card.suit === "Heart" || card.suit === "Diamond";
   const colorClass = isRed ? "red" : "black";
   const center = card.rank === "Joker"
-    ? `<div class="card-center joker-word">${card.suit}</div>`
+    ? `
+      <div class="card-center joker-center">
+        <div class="joker-title">${card.suit === "Color" ? "JOKER" : "JOKER"}</div>
+        <div class="joker-glyph">${card.suit === "Color" ? "★" : "♛"}</div>
+        <div class="joker-subtitle">${card.suit === "Color" ? "COLOR" : "GRAY"}</div>
+      </div>
+    `
     : `
       <div class="card-center">
         <div class="center-rank">${card.rank}</div>
@@ -215,6 +221,16 @@ function renderHand(room) {
     if (suitDiff !== 0) return suitDiff;
     return (rankOrder[left.rank] ?? 99) - (rankOrder[right.rank] ?? 99);
   });
+  const handCount = Math.max(sortedHand.length, 1);
+  const handWidth = els.hand.clientWidth || els.hand.parentElement?.clientWidth || window.innerWidth - 40;
+  const maxWidth = window.innerWidth <= 680 ? 98 : 124;
+  const minWidth = window.innerWidth <= 680 ? 58 : 84;
+  const overlapTarget = window.innerWidth <= 680 ? 0.4 : 0.34;
+  const computedWidth = Math.floor((handWidth + (handCount - 1) * (maxWidth * overlapTarget)) / handCount);
+  const cardWidth = Math.max(minWidth, Math.min(maxWidth, computedWidth));
+  const overlap = Math.min(Math.round(cardWidth * overlapTarget), Math.round(cardWidth * 0.46));
+  els.hand.style.setProperty("--card-width", `${cardWidth}px`);
+  els.hand.style.setProperty("--card-overlap", `${overlap}px`);
   const midpoint = Math.max(sortedHand.length - 1, 0) / 2;
 
   sortedHand.forEach((card, index) => {
