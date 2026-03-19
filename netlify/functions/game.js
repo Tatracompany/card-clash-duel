@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 const {
   createRoom,
   attachPlayer,
@@ -40,6 +40,8 @@ async function clearQuickMatchIfMatches(playerId) {
 
 exports.handler = async (event) => {
   try {
+    connectLambda(event);
+
     const metaStore = getStore("meta");
     const roomsStore = getStore("rooms");
 
