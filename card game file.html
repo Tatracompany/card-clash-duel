@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Clash Duel Online</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <p class="eyebrow">Online 2-Player Card Game</p>
+      <h1>Card Clash Duel</h1>
+      <p class="summary">
+        Create a room, join a room, or use quick match. Two players bid, choose trump,
+        discard, draw, refill to 9 cards, and keep playing hands until someone reaches 21 points.
+      </p>
+      <div class="status-banner" id="statusBanner">Connecting...</div>
+    </section>
+
+    <section class="panel" id="lobbyPanel">
+      <h2>Lobby</h2>
+      <p>Enter a player name, then create a room, join a friend, or let the server find a match.</p>
+      <div class="lobby-grid">
+        <input id="nameInput" class="text-input" type="text" maxlength="24" placeholder="Player name" autocomplete="nickname" enterkeyhint="done">
+        <input id="roomCodeInput" class="text-input" type="text" maxlength="12" placeholder="Room code" autocapitalize="characters" autocomplete="off" enterkeyhint="go">
+      </div>
+      <div class="actions">
+        <button id="quickMatchButton" class="secondary" type="button">Quick Match</button>
+        <button id="createRoomButton" class="primary" type="button">Create Room</button>
+        <button id="joinRoomButton" class="secondary" type="button">Join Room</button>
+      </div>
+    </section>
+
+    <section id="gamePanel" hidden>
+      <section class="scoreboard" aria-label="Scoreboard">
+        <article class="score-card">
+          <h2>Player 1 Points</h2>
+          <p id="score1" class="score">0</p>
+        </article>
+        <article class="score-card">
+          <h2>Player 2 Points</h2>
+          <p id="score2" class="score">0</p>
+        </article>
+      </section>
+
+      <section class="panel">
+        <p class="meta-line" id="roomCodeLabel">Room</p>
+        <p class="meta-line" id="roomPlayers">Waiting...</p>
+      </section>
+
+      <section class="panel">
+        <h2>Hand Info</h2>
+        <p id="handInfoText" class="trump-text">Bids: P1 ? | P2 ? | Match to 21</p>
+      </section>
+
+      <section class="panel">
+        <h2>Strongest Suit</h2>
+        <p id="trumpSuitText" class="trump-text">Not chosen yet</p>
+      </section>
+
+      <section class="panel">
+        <h2 id="phaseTitle">Waiting</h2>
+        <p id="statusText">Waiting for the server.</p>
+      </section>
+
+      <section class="panel reveal-panel">
+        <div class="reveal-slot">
+          <h3>Player 1 Card</h3>
+          <div id="playedCard1" class="played-card empty">?</div>
+        </div>
+        <div class="reveal-slot">
+          <h3>Player 2 Card</h3>
+          <div id="playedCard2" class="played-card empty">?</div>
+        </div>
+      </section>
+
+      <section class="panel hand-panel">
+        <div class="hand-header">
+          <h2 id="handTitle">Your Hand</h2>
+          <p id="handHint">Only your cards are visible on this computer.</p>
+        </div>
+        <div id="handContainer" class="hand" role="list"></div>
+      </section>
+
+      <section class="panel controls-panel" id="actionPanel">
+        <button id="continueButton" class="secondary" type="button" hidden>Continue</button>
+      </section>
+
+      <section class="panel bid-panel" id="bidPanel" hidden>
+        <h2>Choose Bid</h2>
+        <p>Bid higher than the current bid, or pass.</p>
+        <div class="bid-buttons">
+          <button class="secondary bid-button" data-bid="5" type="button">5</button>
+          <button class="secondary bid-button" data-bid="6" type="button">6</button>
+          <button class="secondary bid-button" data-bid="7" type="button">7</button>
+          <button class="secondary bid-button" data-bid="8" type="button">8</button>
+          <button class="secondary bid-button" data-bid="9" type="button">9</button>
+          <button class="secondary bid-button" data-bid="pass" type="button">Pass</button>
+        </div>
+      </section>
+
+      <section class="panel suit-picker" id="suitPickerPanel" hidden>
+        <h2>Choose Trump</h2>
+        <p id="suitPickerText">Choose the strongest suit.</p>
+        <div class="suit-buttons">
+          <button class="secondary suit-button" data-suit="Heart" type="button">Heart</button>
+          <button class="secondary suit-button" data-suit="Diamond" type="button">Diamond</button>
+          <button class="secondary suit-button" data-suit="Spade" type="button">Spade</button>
+          <button class="secondary suit-button" data-suit="Clover" type="button">Clover</button>
+        </div>
+      </section>
+
+      <section class="panel draw-panel" id="drawPanel" hidden>
+        <h2>Draw Decision</h2>
+        <p id="drawPrompt">Look at the first card and decide.</p>
+        <div id="drawnCard" class="played-card empty">?</div>
+        <div class="draw-actions">
+          <button id="keepFirstButton" class="secondary" type="button">Keep First Card</button>
+          <button id="rejectFirstButton" class="secondary" type="button">Reject And Take Second</button>
+        </div>
+      </section>
+
+      <section class="panel rules">
+        <h2>How To Play</h2>
+        <ul>
+          <li>Two players join the same room or use quick match.</li>
+          <li>Each hand starts with 5 cards per player and bidding from 5 to 9 or pass.</li>
+          <li>The bid winner chooses trump, both players discard 3 cards, and both use the special draw phase.</li>
+          <li>Hands refill to 9 cards, then all 9 tricks are played.</li>
+          <li>If the contractor makes the bid, they score that many match points.</li>
+          <li>The match continues with new hands until one player reaches 21 points first.</li>
+        </ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

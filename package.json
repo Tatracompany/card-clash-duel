@@ -1,0 +1,12 @@
+{
+  "name": "card-clash-duel-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "main": "netlify/functions/game.js",
+  "scripts": {
+    "start": "npx netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
