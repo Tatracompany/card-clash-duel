@@ -11,10 +11,13 @@ const state = {
   reconnectAttempts: 0,
 };
 
+const BUILD_VERSION = "c386367";
+
 const $ = (id) => document.getElementById(id);
 const els = {
   hero: document.querySelector(".hero"),
   banner: $("statusBanner"),
+  buildVersion: $("buildVersion"),
   lobby: $("lobbyPanel"),
   game: $("gamePanel"),
   lobbyText: $("lobbyText"),
@@ -84,6 +87,10 @@ const pipLayouts = {
 
 function setBanner(text) {
   els.banner.textContent = text;
+}
+
+if (els.buildVersion) {
+  els.buildVersion.textContent = `Build: ${BUILD_VERSION}`;
 }
 
 function suitGlyph(suit) {

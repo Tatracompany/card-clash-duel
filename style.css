@@ -400,6 +400,14 @@ h1 {
   line-height: 1.5;
 }
 
+.build-version {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b9c6ac;
+}
+
 .actions,
 .controls-panel {
   display: flex;
