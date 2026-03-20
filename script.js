@@ -127,7 +127,7 @@ function svgCardMarkup(card) {
   const pipNodes = positions.map((position) => {
     const [x, y] = pipCoords[position];
     const rotate = position.startsWith("b") || position === "icb";
-    return svgPip(x, y, symbol, rotate);
+    return `<g fill="${color}">${svgPip(x, y, symbol, rotate)}</g>`;
   }).join("");
 
   const center = card.rank === "Joker"
