@@ -40,6 +40,8 @@ const els = {
   handTitle: $("handTitle"),
   handHint: $("handHint"),
   hand: $("handContainer"),
+  discardPreview: $("discardPreview"),
+  discardPreviewCards: $("discardPreviewCards"),
   actionPanel: $("actionPanel"),
   copyInvite: $("copyInviteButton"),
   confirmCard: $("confirmCardButton"),
@@ -464,9 +466,9 @@ function renderHand(room) {
   const handCount = Math.max(sortedHand.length, 1);
   const handWidth = (els.hand.clientWidth || els.hand.parentElement?.clientWidth || window.innerWidth - 40) - 8;
   const isCompact = window.innerWidth <= 680;
-  const maxWidth = isCompact ? 50 : 72;
-  const minWidth = isCompact ? 26 : 40;
-  const overlapTarget = isCompact ? 0.7 : 0.58;
+  const maxWidth = isCompact ? 58 : 84;
+  const minWidth = isCompact ? 32 : 48;
+  const overlapTarget = isCompact ? 0.68 : 0.56;
   const computedWidth = Math.floor(handWidth / (1 + (handCount - 1) * (1 - overlapTarget)));
   const cardWidth = Math.max(minWidth, Math.min(maxWidth, computedWidth));
   const overlap = Math.round(cardWidth * overlapTarget);
@@ -518,6 +520,31 @@ function renderHand(room) {
   });
 }
 
+function renderDiscardPreview(room) {
+  if (!els.discardPreview || !els.discardPreviewCards) return;
+  if (room.phase !== "discard" || state.selectedCardIds.length === 0) {
+    els.discardPreview.hidden = true;
+    els.discardPreviewCards.innerHTML = "";
+    return;
+  }
+  const selected = state.selectedCardIds
+    .map((id) => room.yourHand.find((card) => card.id === id))
+    .filter(Boolean);
+  if (selected.length === 0) {
+    els.discardPreview.hidden = true;
+    els.discardPreviewCards.innerHTML = "";
+    return;
+  }
+  els.discardPreview.hidden = false;
+  els.discardPreviewCards.innerHTML = "";
+  selected.forEach((card) => {
+    const preview = document.createElement("div");
+    preview.className = "discard-preview-card";
+    preview.innerHTML = deckStyleCardMarkup(card);
+    els.discardPreviewCards.appendChild(preview);
+  });
+}
+
 function renderRoom(room) {
   if (els.hero) els.hero.hidden = true;
   els.lobby.hidden = true;
@@ -553,6 +580,7 @@ function renderRoom(room) {
   if (els.handHint) els.handHint.textContent = room.handHint;
   renderOpponentHand(room);
   renderHand(room);
+  renderDiscardPreview(room);
 
   els.copyInvite.hidden = !room.roomCode;
   els.copyInvite.disabled = state.loading || !room.roomCode;

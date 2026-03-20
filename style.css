@@ -128,6 +128,42 @@ body {
   margin-top: 70px;
 }
 
+.discard-preview {
+  position: absolute;
+  right: 8px;
+  top: -4px;
+  width: 76px;
+  padding: 8px 6px 10px;
+  border-radius: 12px;
+  background: rgba(8, 31, 12, 0.92);
+  border: 1px solid rgba(255, 214, 96, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+  z-index: 6;
+}
+
+.discard-preview-title {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d5ddb0;
+}
+
+.discard-preview-cards {
+  display: grid;
+  gap: 6px;
+}
+
+.discard-preview-card {
+  width: 100%;
+  aspect-ratio: 140 / 190;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fffefb;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
 .hand-side-hud {
   position: static;
   display: flex;
@@ -808,11 +844,11 @@ button:disabled {
   justify-content: center;
   align-items: flex-end;
   gap: 0;
-  padding: 6px 4px 0;
+  padding: 6px 88px 0 4px;
   min-height: 122px;
   overflow: hidden;
   overflow-y: hidden;
-  --card-width: 80px;
+  --card-width: 88px;
   --card-overlap: 42px;
 }
 
@@ -1057,6 +1093,13 @@ button:disabled {
     margin-top: 50px;
   }
 
+  .discard-preview {
+    width: 68px;
+    right: 6px;
+    top: -2px;
+    padding: 7px 5px 8px;
+  }
+
   .card-back {
     width: 48px;
     height: 72px;
@@ -1155,6 +1198,7 @@ button:disabled {
   .hand {
     justify-content: center;
     min-height: 126px;
+    padding-right: 78px;
   }
 
   .hand-side-hud {
@@ -1186,6 +1230,18 @@ button:disabled {
 
   .player-zone {
     margin-top: 36px;
+  }
+
+  .discard-preview {
+    width: 60px;
+    right: 4px;
+    top: 0;
+    padding: 6px 4px 8px;
+  }
+
+  .discard-preview-title {
+    margin-bottom: 6px;
+    font-size: 0.5rem;
   }
 
   .hand-card {
