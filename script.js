@@ -146,14 +146,16 @@ function svgCardMarkup(card) {
 
   return `
     <div class="card-svg-wrap">
-      <svg class="card-svg" viewBox="0 0 140 190" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg class="card-svg" viewBox="0 0 140 190" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="1.5" y="1.5" width="137" height="187" rx="14" fill="#fffdf9" stroke="rgba(0,0,0,0.14)" stroke-width="1.5" />
         <rect x="6" y="6" width="128" height="178" rx="11" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="1" />
-        ${svgText(14, 22, card.rank, `fill="${color}" class="svg-corner-rank"`)}
-        ${svgText(14, 37, symbol, `fill="${color}" class="svg-corner-suit"`)}
-        <g transform="translate(126 168) rotate(180)">
-          ${svgText(0, 0, card.rank, `fill="${color}" class="svg-corner-rank" text-anchor="end"`)}
-          ${svgText(0, 15, symbol, `fill="${color}" class="svg-corner-suit" text-anchor="end"`)}
+        <g class="svg-corner top-corner" fill="${color}">
+          ${svgText(14, 22, card.rank, 'class="svg-corner-rank"')}
+          ${svgText(14, 37, symbol, 'class="svg-corner-suit"')}
+        </g>
+        <g class="svg-corner bottom-corner" transform="translate(126 168) rotate(180)" fill="${color}">
+          ${svgText(0, 0, card.rank, 'class="svg-corner-rank"')}
+          ${svgText(0, 15, symbol, 'class="svg-corner-suit"')}
         </g>
         ${center}
       </svg>
